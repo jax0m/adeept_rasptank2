@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-# coding=utf-8
 # File name   : setup.py
 # Author      : Devin
 
@@ -8,7 +7,7 @@ import time
 
 username = os.popen("echo ${SUDO_USER:-$(who -m | awk '{ print $1 }')}").readline().strip() # pi
 user_home = os.popen('getent passwd %s | cut -d: -f 6'%username).readline().strip()         # home
- 
+
 curpath = os.path.realpath(__file__)
 thisPath = "/" + os.path.dirname(curpath)
 
@@ -17,7 +16,7 @@ print(thisPath)
 def replace_num(file,initial,new_num):
     newline=""
     str_num=str(new_num)
-    with open(file,"r") as f:
+    with open(file) as f:
         for line in f.readlines():
             if(line.find(initial) == 0):
                 line = (str_num+'\n')
@@ -58,10 +57,10 @@ def check_python_version():
 def check_os_bit():
     '''
     # import platform
-    # machine_type = platform.machine() 
+    # machine_type = platform.machine()
     latest bullseye uses a 64-bit kernel
-    This method is no longer applicable, the latest raspbian will uses 64-bit kernel 
-    (kernel 6.1.x) by default, "uname -m" shows "aarch64", 
+    This method is no longer applicable, the latest raspbian will uses 64-bit kernel
+    (kernel 6.1.x) by default, "uname -m" shows "aarch64",
     but the system is still 32-bit.
     '''
     _ , os_bit = run_command("getconf LONG_BIT")

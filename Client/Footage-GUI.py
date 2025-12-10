@@ -1,7 +1,8 @@
-import cv2
-import zmq
 import base64
+
+import cv2
 import numpy as np
+import zmq
 
 context = zmq.Context()
 footage_socket = context.socket(zmq.PAIR)

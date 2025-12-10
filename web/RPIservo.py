@@ -2,18 +2,15 @@
 # File name   : RPiservo.py
 # Description : Multi-threaded Control Servos
 # Author	  : Adeept
-from __future__ import division
+import threading
 import time
-from board import SCL, SDA
+
 import busio
 from adafruit_motor import servo
 from adafruit_pca9685 import PCA9685
-import threading
+from board import SCL, SDA
 
-
-
-
-# When the motor occupies pins 9-15 on the PCA9685, 
+# When the motor occupies pins 9-15 on the PCA9685,
 # the servo can only use pins 0-8.
 i2c = busio.I2C(SCL, SDA)
 # Create a simple PCA9685 class instance.
@@ -40,7 +37,7 @@ class ServoCtrl(threading.Thread):
     def __init__(self, *args, **kwargs):
 
 
-        
+
         # global i2c,pwm_servo
         self.i2c = busio.I2C(SCL, SDA)
         # Create a simple PCA9685 class instance.
@@ -48,10 +45,10 @@ class ServoCtrl(threading.Thread):
 
         self.pwm_servo.frequency = 50
 
-        
+
         self.sc_direction = [1,1,1,1, 1,1,1,1]
         # # If motors are not used, 16 servos need to be controlled at the same time.
-        # self.sc_direction = [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1] 
+        # self.sc_direction = [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1]
         self.initPos = [init_pwm0,init_pwm1,init_pwm2,init_pwm3,
                         init_pwm4,init_pwm5,init_pwm6,init_pwm7]
         self.goalPos = [90,90,90,90, 90,90,90,90]
@@ -75,13 +72,13 @@ class ServoCtrl(threading.Thread):
 
         self.scDelay = 0.09
         self.scMoveTime = 0.09
-        
+
 
         self.goalUpdate = 0
         self.wiggleID = 0
         self.wiggleDirection = 1
 
-        super(ServoCtrl, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.__flag = threading.Event()
         self.__flag.clear()
 
@@ -90,7 +87,7 @@ class ServoCtrl(threading.Thread):
         servo_angle = servo.Servo(self.pwm_servo.channels[ID], min_pulse=500, max_pulse=2400,actuation_range=180)
         servo_angle.angle = angle
 
-  
+
     def pause(self):
         print('......................pause..........................')
         self.__flag.clear()
@@ -161,7 +158,7 @@ class ServoCtrl(threading.Thread):
                     self.posUpdate()
                     time.sleep(self.scTime/self.scSteps)
                     return 1
-            time.sleep((self.scTime/self.scSteps - self.scMoveTime))
+            time.sleep(self.scTime/self.scSteps - self.scMoveTime)
 
         self.posUpdate()
         self.pause()
@@ -304,13 +301,10 @@ class ServoCtrl(threading.Thread):
 
 
 if __name__ == '__main__':
-    
+
     scGear = ServoCtrl()
     scGear.moveInit()
     # scGear.start()
     sc = ServoCtrl()
     # sc.setup()
     sc.start()
-    
-   
-

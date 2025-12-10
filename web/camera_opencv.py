@@ -1,29 +1,28 @@
 #!/usr/bin/env python3
-# coding: utf-8
-import os
-import cv2
-from base_camera import BaseCamera
-import RPIservo
-import numpy as np
-import move
-import switch
 import datetime
-import Kalman_filter
-import PID
-import time
-import threading
-import imutils
-import libcamera
-from picamera2 import Picamera2
 import io
+import os
+import threading
+import time
 
+import cv2
+import imutils
+import Kalman_filter
+import libcamera
+import move
+import numpy as np
+import PID
+import RPIservo
+import switch
+from base_camera import BaseCamera
+from picamera2 import Picamera2
 
 pid = PID.PID()
 pid.SetKp(0.5)
 pid.SetKd(0)
 pid.SetKi(0)
 
-Threshold = 80 # 
+Threshold = 80 #
 findLineMove = 1
 tracking_servo_status = 0
 FLCV_Status = 0
@@ -39,8 +38,8 @@ turn_speed = 50 # Range of values: 0-100
 forward_speed = 50 # Avoid too fast, the video screen does not respond in time. Range of values: 0-100.
 
 
-hflip = 0 # Video flip horizontally: 0 or 1 
-vflip = 0 # Video vertical flip: 0/1 
+hflip = 0 # Video flip horizontally: 0 or 1
+vflip = 0 # Video vertical flip: 0/1
 ImgIsNone = 0
 
 colorUpper = np.array([44, 255, 255])
@@ -101,14 +100,14 @@ class CVThread(threading.Thread):
         self.center_Pos2 = None
 
         self.center = None
-        
+
         self.tracking_servo_left = None
         self.tracking_servo_left_mark = 0
         self.tracking_servo_right_mark = 0
         self.servo_left_stop = 0
         self.servo_right_stop = 0
 
-        super(CVThread, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.__flag = threading.Event()
         # self.__flag = Event()
         self.__flag.clear()
@@ -157,7 +156,7 @@ class CVThread(threading.Thread):
                     cv2.putText(imgInput,('Following White Line'),(30,50), cv2.FONT_HERSHEY_SIMPLEX, 0.5,(128,255,128),1,cv2.LINE_AA)
                 else:
                     cv2.putText(imgInput,('Following Black Line'),(30,50), cv2.FONT_HERSHEY_SIMPLEX, 0.5,(128,255,128),1,cv2.LINE_AA)
-                
+
                 imgInput=cv2.merge((imgInput.copy(),imgInput.copy(),imgInput.copy()))
                 cv2.line(imgInput,(self.left_Pos1,(linePos_1+30)),(self.left_Pos1,(linePos_1-30)),(255,128,64),2)
                 cv2.line(imgInput,(self.right_Pos1,(linePos_1+30)),(self.right_Pos1,(linePos_1-30)),(64,128,255),2)
@@ -207,12 +206,12 @@ class CVThread(threading.Thread):
             # if the contour is too small, ignore it
             if cv2.contourArea(c) < 5000:
                 continue
-     
+
             # compute the bounding box for the contour, draw it on the frame,
             # and update the text
             (self.mov_x, self.mov_y, self.mov_w, self.mov_h) = cv2.boundingRect(c)
             self.drawing = 1
-            
+
             self.motionCounter += 1
             #print(motionCounter)
             #print(text)
@@ -227,9 +226,9 @@ class CVThread(threading.Thread):
     def findLineCtrl(self, posInput):
         global findLineMove,tracking_servo_status,FLCV_Status
         # # if posInput:
-        
+
         if FLCV_Status == 0:    # Before video line patrol, initialize the position of the robotic arm.
-            CVThread.scGear.moveAngle(0, 0) 
+            CVThread.scGear.moveAngle(0, 0)
             CVThread.scGear.moveAngle(1, 0)
             CVThread.scGear.moveAngle(2, 0)
             CVThread.scGear.moveAngle(3, 0)
@@ -255,22 +254,22 @@ class CVThread(threading.Thread):
                     move.video_Tracking_Move(turn_speed, 1,"left") # 'no'/'right':turn Right, turn_speed：left wheel speed, 0.2:turn_speed*0.2 = right wheel speed
                 else:
                     move.motorStop() # stop.
-                        
+
             else:
                 tracking_servo_status = 0 # mid
                 if CVRun:
                     move.video_Tracking_Move(forward_speed, 1,"mid")
-                else: 
+                else:
                     move.motorStop() # stop
                 pass
-        
+
         else: # Tracking color not found.
             move.motorStop() # stop.
             FLCV_Status = -1
             if tracking_servo_status == -1 : # -1/0/1: left/mid/right. rotation left.
                 move.video_Tracking_Move(turn_speed, 1,"right")
             elif tracking_servo_status == 1 : # rotation right
-                move.video_Tracking_Move(turn_speed, 1,"left") 
+                move.video_Tracking_Move(turn_speed, 1,"left")
             else:  # no track ahead. tracking_servo_status==0
                 pass
 
@@ -283,7 +282,7 @@ class CVThread(threading.Thread):
         frame_findline = cv2.dilate(frame_findline, None, iterations=2)
         colorPos_1 = frame_findline[linePos_1]
         colorPos_2 = frame_findline[linePos_2]
-        
+
         try:
             lineColorCount_Pos1 = np.sum(colorPos_1 == lineColorSet)
             lineColorCount_Pos2 = np.sum(colorPos_2 == lineColorSet)
@@ -311,7 +310,7 @@ class CVThread(threading.Thread):
                 lineColorCount_Pos2 = 1
 
             self.left_Pos1 = lineIndex_Pos1[0][1] # Is [1] instead of [0], in order to remove black/white edges that may appear on the far left
-            self.right_Pos1 = lineIndex_Pos1[0][lineColorCount_Pos1-2]   # 
+            self.right_Pos1 = lineIndex_Pos1[0][lineColorCount_Pos1-2]   #
 
             self.center_Pos1 = int((self.left_Pos1+self.right_Pos1)/2)
 
@@ -388,7 +387,7 @@ class CVThread(threading.Thread):
             self.__flag.wait()
             if self.CVMode == 'none':
                 continue
-            
+
             elif self.CVMode == 'findColor':
                 self.CVThreading = 1
                 self.findColor(self.imgCV)
@@ -464,7 +463,7 @@ class Camera(BaseCamera):
     def Threshold(self, value):
         global Threshold
         Threshold = value
-        
+
     def ThresholdOK(self):
         global Threshold
         return Threshold
@@ -478,8 +477,8 @@ class Camera(BaseCamera):
     @staticmethod
     def frames():
         global ImgIsNone,hflip,vflip
-        picam2 = Picamera2() 
-        
+        picam2 = Picamera2()
+
         preview_config = picam2.preview_configuration
         preview_config.size = (640, 480)
         preview_config.format = 'RGB888'  # 'XRGB8888', 'XBGR8888', 'RGB888', 'BGR888', 'YUV420'
@@ -536,7 +535,6 @@ class Camera(BaseCamera):
                     img = cvt.elementDraw(img)
                 except:
                     pass
-            
+
             if cv2.imencode('.jpg', img)[0]:
                 yield cv2.imencode('.jpg', img)[1].tobytes()
-            

@@ -1,6 +1,7 @@
 import time
-import board
+
 import adafruit_ads7830.ads7830 as ADC
+import board
 from adafruit_ads7830.analog_in import AnalogIn
 
 i2c = board.I2C()
@@ -23,4 +24,3 @@ if __name__ == "__main__":
         print(f"battery level = {chan0.value/65535*8.4:.2f} V")
 
         time.sleep(0.5)
-

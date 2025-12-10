@@ -1,5 +1,6 @@
-import time
 import argparse
+import time
+
 from gpiozero import InputDevice
 
 line_pin_left = 22
@@ -24,5 +25,3 @@ if __name__ == '__main__':
         time.sleep(0.3)
     except KeyboardInterrupt:
         pass
-
-

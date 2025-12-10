@@ -5,20 +5,20 @@
 # Date		  : 2025/04/28
 
 
-import cv2
-import zmq
+import argparse
 import base64
-from picamera2 import Picamera2
+import datetime
 import io
 
-import argparse
+import cv2
 import imutils
-import PID
 import Kalman_filter
-import datetime
 import move
 import numpy as np
+import PID
 import RPIservo
+import zmq
+from picamera2 import Picamera2
 
 pid = PID.PID()
 pid.SetKp(0.5)
@@ -47,8 +47,8 @@ scGear = RPIservo.ServoCtrl()
 scGear.moveInit()
 Tracking_sc = RPIservo.ServoCtrl()
 Tracking_sc.moveInit()
-colorUpper = np.array([44, 255, 255])  
-colorLower = np.array([24, 100, 100])  
+colorUpper = np.array([44, 255, 255])
+colorLower = np.array([24, 100, 100])
 
 hflip = 0  # Video flip horizontally: 0 or 1
 vflip = 0  # Video vertical flip: 0/1
@@ -57,7 +57,7 @@ def map(input, in_min, in_max, out_min, out_max):
     return (input - in_min) / (in_max - out_min) * (out_max - out_min) + out_min
 
 
-def findLineCtrl(posInput, setCenter): 
+def findLineCtrl(posInput, setCenter):
     global findLineMove, tracking_servo_status, FLCV_Status, tracking_servo_left, tracking_servo_left_mark, \
         tracking_servo_right_mark, servo_left_stop, servo_right_stop,CVRun,turn_speed
     if FLCV_Status == 0:
@@ -234,7 +234,7 @@ class FPV:
         global UltraData
         UltraData = invar
 
-    def setExpCom(self, invar): 
+    def setExpCom(self, invar):
         if invar > 25:
             invar = 25
         elif invar < -25:
@@ -242,7 +242,7 @@ class FPV:
         else:
             camera.exposure_compensation = invar
 
-    def defaultExpCom(self): 
+    def defaultExpCom(self):
         camera.exposure_compensation = 0
 
     def colorFindSet(self, invarH, invarS, invarV):
@@ -274,7 +274,7 @@ class FPV:
         print('HSV_2:%d %d %d' % (HUE_2, SAT_2, VAL_2))
         print(colorUpper)
         print(colorLower)
-        
+
     def servoMove(ID, Dir, errorInput):
         if ID == 1:
             errorGenOut = FPV.kalman_filter_X.kalman(errorInput)
@@ -413,5 +413,3 @@ if __name__ == '__main__':
     fpv = FPV()
     while 1:
         fpv.capture_thread('192.168.3.199')
-
-    

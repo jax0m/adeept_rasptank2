@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-from gpiozero import TonalBuzzer
 from time import sleep
 
+from gpiozero import TonalBuzzer
+
 # Initialize a TonalBuzzer connected to GPIO18 (BCM)
-tb = TonalBuzzer(18) 
+tb = TonalBuzzer(18)
 
 # Define a musical tune as a sequence of notes and durations.
 SONG =	[
@@ -20,7 +21,7 @@ SONG =	[
 def play(tune):
     """
     Play a musical tune using the buzzer.
-    :param tune: List of tuples (note, duration), 
+    :param tune: List of tuples (note, duration),
     where each tuple represents a note and its duration.
     """
     for note, duration in tune:

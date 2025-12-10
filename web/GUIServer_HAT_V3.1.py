@@ -4,21 +4,22 @@
 # Author      : Adeept
 # Date		  : 2025/04/28
 
-import time
-import threading
-import move
-import os
-import info
-import RPIservo
-
-import functions
-import robotLight
-import switch
-import socket
 import ast
-import FPV
 import json
+import os
+import socket
+import threading
+import time
+
+import FPV
+import functions
+import info
+import move
+import robotLight
+import RPIservo
+import switch
 import Voltage
+
 mark_test = 0
 
 speed_set = 25
@@ -63,7 +64,7 @@ def replace_num(initial,new_num):   #Call this function to replace data in '.txt
     global r
     newline=""
     str_num=str(new_num)
-    with open(thisPath+"/RPIservo.py","r") as f:
+    with open(thisPath+"/RPIservo.py") as f:
         for line in f.readlines():
             if(line.find(initial) == 0):
                 line = initial+"%s" %(str_num+"\n")
@@ -85,11 +86,11 @@ def ap_thread():
 def functionSelect(command_input, response):
     if 'findColor' == command_input:
         fpv.FindColor(1)
-        tcpCliSock.send(('FindColor').encode())
+        tcpCliSock.send(b'FindColor')
 
     elif 'motionGet' == command_input:
         fpv.WatchDog(1)
-        tcpCliSock.send(('WatchDog').encode())
+        tcpCliSock.send(b'WatchDog')
 
     elif 'stopCV' == command_input:
         fpv.FindColor(0)
@@ -140,7 +141,7 @@ def switchCtrl(command_input):
         switch.switch(3,1)
 
     elif 'Switch_3_off' in command_input:
-        switch.switch(3,0) 
+        switch.switch(3,0)
 
 
 def robotCtrl(command_input):
@@ -148,7 +149,7 @@ def robotCtrl(command_input):
     if 'forward' == command_input:
         direction_command = 'forward'
         move.move(speed_set, 1, "mid")
-    
+
     elif 'backward' == command_input:
         direction_command = 'backward'
         move.move(speed_set, -1, "mid")
@@ -286,7 +287,7 @@ def wifi_check():
         ipaddr_check=s.getsockname()[0]
         s.close()
         print(ipaddr_check)
-        mark_test = 1  
+        mark_test = 1
     except:
         if mark_test == 1:
             mark_test = 0
@@ -305,7 +306,7 @@ def recv_msg(tcpCliSock):
     global speed_set
     move.setup()
 
-    while True: 
+    while True:
         response = {
             'status' : 'ok',
             'title' : '',
@@ -340,7 +341,7 @@ def recv_msg(tcpCliSock):
                     pass
             elif 'CVFL' == data:
                 FPV.FindLineMode = 1
-                tcpCliSock.send(('CVFL_on').encode())
+                tcpCliSock.send(b'CVFL_on')
 
 
             elif 'CVFLColorSet' in data:
@@ -393,12 +394,12 @@ def test_Network_Connection():
             s.close()
         except:
             move.destroy()
-        
+
         time.sleep(0.5)
 
 if __name__ == '__main__':
     switch.switchSetup()
-    switch.set_all_switch_off()                                  
+    switch.set_all_switch_off()
 
     ws2812=robotLight.Adeept_SPI_LedPixel(16, 255)
     try:
@@ -410,28 +411,25 @@ if __name__ == '__main__':
         pass
 
     HOST = ''
-    PORT = 10223                              #Define port serial 
+    PORT = 10223                              #Define port serial
     BUFSIZ = 1024                             #Define buffer size
     ADDR = (HOST, PORT)
 
-   
+
     wifi_check()
     try:                  #Start server,waiting for client
         tcpSerSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         tcpSerSock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
         tcpSerSock.bind(ADDR)
-        tcpSerSock.listen(5)                   
+        tcpSerSock.listen(5)
         print("Waiting for client connection")
         tcpCliSock, addr = tcpSerSock.accept()
         print("Connected to the client :" + str(addr))
         fps_threading=threading.Thread(target=FPV_thread)         #Define a thread for FPV and OpenCV
         fps_threading.setDaemon(True)                             #'True' means it is a front thread,it would close when the mainloop() closes
-        fps_threading.start()   
-        recv_msg(tcpCliSock)  
+        fps_threading.start()
+        recv_msg(tcpCliSock)
     except Exception as e:
         print(e)
         ws2812.set_all_led_color_data(0,0,0)
         ws2812.show()
-
-
-

@@ -3,14 +3,17 @@
 # Description : Control lights
 # Author	  : Adeept
 # Date		: 2025/02/23
-import time
 import sys
-from gpiozero import PWMOutputDevice as PWM
-from rpi_ws281x import *
 import threading
-import spidev
+import time
+
 import numpy
-from numpy import sin, cos, pi
+import spidev
+from gpiozero import PWMOutputDevice as PWM
+from numpy import cos, pi, sin
+from rpi_ws281x import *
+
+
 def check_rpi_model():
     _, result = run_command("cat /proc/device-tree/model |awk '{print $3}'")
     result = result.strip()
@@ -60,7 +63,7 @@ class RobotWS2812(threading.Thread):
         # Intialize the library (must be called once before other functions).
         self.strip.begin()
 
-        super(RobotWS2812, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.__flag = threading.Event()
         self.__flag.clear()
 
@@ -175,7 +178,7 @@ class Adeept_SPI_LedPixel(threading.Thread):
         self.breathSteps = 10
         #self.spi_gpio_info()
         self.set_all_led_color(0,0,0)
-        super(Adeept_SPI_LedPixel, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.__flag = threading.Event()
         self.__flag.clear()
     def led_begin(self, bus = 0, device = 0):
@@ -194,10 +197,10 @@ class Adeept_SPI_LedPixel(threading.Thread):
             else:
                 print("Please add 'dtoverlay=spi{}-2cs' at the bottom of the /boot/firmware/config.txt, then reboot the Raspberry Pi. otherwise spi{} will not be available.".format(self.bus, self.bus))
             self.led_init_state = 0
-            
+
     def check_spi_state(self):
         return self.led_init_state
-        
+
     def spi_gpio_info(self):
         if self.bus == 0:
             print("SPI0-MOSI: GPIO10(WS2812-PIN)  SPI0-MISO: GPIO9  SPI0-SCLK: GPIO11  SPI0-CE0: GPIO8  SPI0-CE1: GPIO7")
@@ -213,16 +216,16 @@ class Adeept_SPI_LedPixel(threading.Thread):
             print("SPI5-MOSI: GPIO14(WS2812-PIN)  SPI5-MISO: GPIO13  SPI5-SCLK: GPIO15  SPI5-CE0: GPIO12  SPI5-CE1: GPIO26")
         elif self.bus == 6:
             print("SPI6-MOSI: GPIO20(WS2812-PIN)  SPI6-MISO: GPIO19  SPI6-SCLK: GPIO21  SPI6-CE0: GPIO18  SPI6-CE1: GPIO27")
-    
+
     def led_close(self):
         self.set_all_led_rgb([0,0,0])
         self.spi.close()
-    
+
     def set_led_count(self, count):
         self.led_count = count
         self.led_color = [0,0,0] * self.led_count
         self.led_original_color = [0,0,0] * self.led_count
-    
+
     def set_led_type(self, rgb_type):
         try:
             led_type = ['RGB','RBG','GRB','GBR','BRG','BGR']
@@ -237,12 +240,12 @@ class Adeept_SPI_LedPixel(threading.Thread):
             self.led_green_offset = 0
             self.led_blue_offset = 2
             return -1
-    
+
     def set_led_brightness(self, brightness):
         self.led_brightness = brightness
         for i in range(self.led_count):
             self.set_led_rgb_data(i, self.led_original_color)
-            
+
     def set_ledpixel(self, index, r, g, b):
         p = [0,0,0]
         p[self.led_red_offset] = round(r * self.led_brightness / 255)
@@ -255,66 +258,66 @@ class Adeept_SPI_LedPixel(threading.Thread):
             self.led_color[index*3+i] = p[i]
 
     def setSomeColor_data(self, index, r, g, b):
-        self.set_ledpixel(index, r, g, b)  
-        
+        self.set_ledpixel(index, r, g, b)
+
     def set_led_rgb_data(self, index, color):
-        self.set_ledpixel(index, color[0], color[1], color[2])   
-        
+        self.set_ledpixel(index, color[0], color[1], color[2])
+
     def setSomeColor(self, index, r, g, b):
         self.set_ledpixel(index, r, g, b)
-        self.show() 
-        
+        self.show()
+
     def set_led_rgb(self, index, color):
-        self.set_led_rgb_data(index, color)   
-        self.show() 
-    
+        self.set_led_rgb_data(index, color)
+        self.show()
+
     def set_all_led_color_data(self, r, g, b):
         for i in range(self.led_count):
             self.setSomeColor_data(i, r, g, b)
-            
+
     def set_all_led_rgb_data(self, color):
         for i in range(self.led_count):
-            self.set_led_rgb_data(i, color)   
-        
+            self.set_led_rgb_data(i, color)
+
     def set_all_led_color(self, r, g, b):
         for i in range(self.led_count):
             self.setSomeColor_data(i, r, g, b)
         self.show()
-        
+
     def set_all_led_rgb(self, color):
         for i in range(self.led_count):
-            self.set_led_rgb_data(i, color) 
+            self.set_led_rgb_data(i, color)
         self.show()
-    
+
     def write_ws2812_numpy8(self):
         d = numpy.array(self.led_color).ravel()        #Converts data into a one-dimensional array
         tx = numpy.zeros(len(d)*8, dtype=numpy.uint8)  #Each RGB color has 8 bits, each represented by a uint8 type data
         for ibit in range(8):                          #Convert each bit of data to the data that the spi will send
-            tx[7-ibit::8]=((d>>ibit)&1)*0x78 + 0x80    #T0H=1,T0L=7, T1H=5,T1L=3   #0b11111000 mean T1(0.78125us), 0b10000000 mean T0(0.15625us)  
+            tx[7-ibit::8]=((d>>ibit)&1)*0x78 + 0x80    #T0H=1,T0L=7, T1H=5,T1L=3   #0b11111000 mean T1(0.78125us), 0b10000000 mean T0(0.15625us)
         if self.led_init_state != 0:
             if self.bus == 0:
                 self.spi.xfer(tx.tolist(), int(8/1.25e-6))         #Send color data at a frequency of 6.4Mhz
             else:
                 self.spi.xfer(tx.tolist(), int(8/1.0e-6))          #Send color data at a frequency of 8Mhz
-        
+
     def write_ws2812_numpy4(self):
         d=numpy.array(self.led_color).ravel()
         tx=numpy.zeros(len(d)*4, dtype=numpy.uint8)
         for ibit in range(4):
-            tx[3-ibit::4]=((d>>(2*ibit+1))&1)*0x60 + ((d>>(2*ibit+0))&1)*0x06 + 0x88  
+            tx[3-ibit::4]=((d>>(2*ibit+1))&1)*0x60 + ((d>>(2*ibit+0))&1)*0x06 + 0x88
         if self.led_init_state != 0:
             if self.bus == 0:
-                self.spi.xfer(tx.tolist(), int(4/1.25e-6))         
+                self.spi.xfer(tx.tolist(), int(4/1.25e-6))
             else:
-                self.spi.xfer(tx.tolist(), int(4/1.0e-6))       
-        
+                self.spi.xfer(tx.tolist(), int(4/1.0e-6))
+
     def show(self, mode = 1):
         if mode == 1:
             write_ws2812 = self.write_ws2812_numpy8
         else:
             write_ws2812 = self.write_ws2812_numpy4
         write_ws2812()
-        
+
     def wheel(self, pos):
         if pos < 85:
             return [(255 - pos * 3), (pos * 3), 0]
@@ -324,7 +327,7 @@ class Adeept_SPI_LedPixel(threading.Thread):
         else:
             pos = pos - 170
             return [(pos * 3), 0, (255 - pos * 3)]
-    
+
     def hsv2rgb(self, h, s, v):
         h = h % 360
         rgb_max = round(v * 2.55)
@@ -357,18 +360,18 @@ class Adeept_SPI_LedPixel(threading.Thread):
             g = rgb_min
             b = rgb_max - rgb_adj
         return [r, g, b]
-    
+
     def police(self):
         self.lightMode = 'police'
         self.resume()
-        
+
     def breath(self, R_input, G_input, B_input):
         self.lightMode = 'breath'
         self.colorBreathR = R_input
         self.colorBreathG = G_input
         self.colorBreathB = B_input
-        self.resume()    
-            
+        self.resume()
+
     def resume(self):
         self.__flag.set()
 
@@ -413,16 +416,16 @@ class Adeept_SPI_LedPixel(threading.Thread):
                 self.show()
                 time.sleep(0.05)
             time.sleep(0.1)
-            
-            
+
+
     def lightChange(self):
         if self.lightMode == 'none':
             self.pause()
         elif self.lightMode == 'police':
             self.policeProcessing()
         elif self.lightMode == 'breath':
-            self.breathProcessing()    
-    
+            self.breathProcessing()
+
     def run(self):
         while 1:
             self.__flag.wait()
@@ -441,11 +444,11 @@ class RobotLight(threading.Thread):
         self.right_R = 5
         self.right_G = 6
         self.right_B = 1
-        
+
         self.Left_G = PWM(pin=self.left_R,initial_value=1.0, frequency=2000)
         self.Left_B = PWM(pin=self.left_G,initial_value=1.0, frequency=2000)
         self.Left_R = PWM(pin=self.left_B,initial_value=1.0, frequency=2000)
-        
+
         self.Right_G = PWM(pin=self.right_R,initial_value=1.0, frequency=2000)
         self.Right_B = PWM(pin=self.right_G,initial_value=1.0, frequency=2000)
         self.Right_R = PWM(pin=self.right_B,initial_value=1.0, frequency=2000)
@@ -487,12 +490,12 @@ class RobotLight(threading.Thread):
 
 
 if __name__ == '__main__':
-    import time
     import os
+    import time
     print("spidev version is ", spidev.__version__)
     print("spidev device as show:")
 #    os.system("ls /dev/spi*")
-    
+
     led = Adeept_SPI_LedPixel(8, 255)              # Use MOSI for /dev/spidev0 to drive the lights
     try:
         if led.check_spi_state() != 0:
@@ -518,7 +521,7 @@ if __name__ == '__main__':
                 led.set_led_brightness(255-i)
                 led.show()
                 time.sleep(0.005)
-                  
+
             led.set_led_brightness(20)
             while True:
                 for j in range(255):

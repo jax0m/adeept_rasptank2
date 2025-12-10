@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-# coding=utf-8
 # File name   : move.py
 # Description : Control Motor
 # Website     : www.adeept.com
 # Author      : Adeept
 # Date        : 2025/03/10
 import time
-from board import SCL, SDA
+
 import busio
-from adafruit_pca9685 import PCA9685
 from adafruit_motor import motor
+from adafruit_pca9685 import PCA9685
+from board import SCL, SDA
 
 MOTOR_M1_IN1 =  15      #Define the positive pole of M1
 MOTOR_M1_IN2 =  14      #Define the negative pole of M1
@@ -86,7 +86,7 @@ def Motor(channel,direction,motor_speed):
 
   speed = map(motor_speed, 0, 100, 0, 1.0)
 
-  # setup() 
+  # setup()
   pwm_motor.frequency = FREQ
   # Prevent the servo from affecting the frequency of the motor
   if direction == -1:
@@ -100,7 +100,7 @@ def Motor(channel,direction,motor_speed):
   elif channel == 4:
     motor4.throttle = speed
 
-def move(speed, direction, turn, radius=0.6):   # 0 < radius <= 1  
+def move(speed, direction, turn, radius=0.6):   # 0 < radius <= 1
     #eg: move(100, 1, "mid")--->forward
     #    move(100, 1, "left")---> left forward
     #speed:0~100. direction:1. turn: "left", "right", "mid".
@@ -126,7 +126,7 @@ def destroy():
     motorStop()
     pwm_motor.deinit()
 
-def trackingMove(speed, direction, turn, radius=0.6):   # 0 < radius <= 1  
+def trackingMove(speed, direction, turn, radius=0.6):   # 0 < radius <= 1
     #eg: move(100, 1, "mid")--->forward
     #    move(100, 1, "left")---> left forward
     #speed:0~100. direction:1. turn: "left", "right", "mid".
@@ -151,7 +151,7 @@ def trackingMove(speed, direction, turn, radius=0.6):   # 0 < radius <= 1
 
 
 # Used for motor speed control during video line patrol.
-def video_Tracking_Move(speed, direction, turn, radius=0):   # 0 < radius <= 1  
+def video_Tracking_Move(speed, direction, turn, radius=0):   # 0 < radius <= 1
     #eg: move(100, 1, "mid")--->forward
     #    move(100, 1, "left")---> left forward
     #speed:0~100. direction:1. turn: "left", "right", "mid".
@@ -172,7 +172,7 @@ def video_Tracking_Move(speed, direction, turn, radius=0):   # 0 < radius <= 1
         elif direction == -1: 		# backward
             Motor(1, -M1_Direction, speed)
             Motor(2, -M2_Direction, speed)
-            
+
 
 if __name__ == '__main__':
     try:
@@ -187,4 +187,3 @@ if __name__ == '__main__':
         motorStop()
     except KeyboardInterrupt:
         destroy()
-

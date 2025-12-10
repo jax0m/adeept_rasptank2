@@ -1,11 +1,12 @@
 #!/usr/bin/env/python3
 import time
-from board import SCL, SDA
+
 import busio
+from adafruit_motor import motor
 #from adafruit_motor import servo,motor
 #from adafruit_motor import motor
 from adafruit_pca9685 import PCA9685
-from adafruit_motor import motor
+from board import SCL, SDA
 
 # motor_EN_A: Pin7  |  motor_EN_B: Pin11
 # motor_A:  Pin8,Pin10    |  motor_B: Pin13,Pin12
@@ -31,7 +32,7 @@ right_backward= 1
 
 pwn_A = 0
 pwm_B = 0
-  
+
 def map(x,in_min,in_max,out_min,out_max):
   return (x - in_min)/(in_max - in_min) *(out_max - out_min) +out_min
 
@@ -95,7 +96,7 @@ if __name__ == '__main__':
   try:
     chann =  1
     # while True:
-     
+
     for i in range(10):
       speed_set = 50
       Motor(chann, -1, speed_set)
@@ -114,4 +115,3 @@ if __name__ == '__main__':
     destroy()
   except KeyboardInterrupt:
     destroy()
-

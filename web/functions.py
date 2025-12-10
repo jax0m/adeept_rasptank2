@@ -3,11 +3,12 @@
 # Description : Control Functions
 # Author	  : Adeept
 # Date		: 2024/03/10
-import time
 import threading
-import ultra
+import time
+
 import move
 import RPIservo
+import ultra
 from gpiozero import InputDevice
 
 scGear = RPIservo.ServoCtrl()
@@ -43,7 +44,7 @@ class Functions(threading.Thread):
 
 		# setup()
 
-		super(Functions, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self.__flag = threading.Event()
 		self.__flag.clear()
 
@@ -101,9 +102,9 @@ class Functions(threading.Thread):
 		time.sleep(0.1)
 
 
-	
+
 # Filter out occasional incorrect distance data.
-	def distRedress(self): 
+	def distRedress(self):
 		mark = 0
 		distValue = ultra.checkdist()
 		while True:
@@ -125,7 +126,7 @@ class Functions(threading.Thread):
 			move.move(AutoMatic_Speed, 1, "mid")
 			print("Forward")
 		# More than 20cm and less than 40cm, speed reduced.
-		elif dist > 20 and dist < 40:	
+		elif dist > 20 and dist < 40:
 			move.move(AutoMatic_Speed, 1, "left")
 			time.sleep(0.2)
 			distLeft = self.distRedress()
@@ -182,7 +183,7 @@ if __name__ == '__main__':
 	try:
 		fuc=Functions()
 		fuc.setup()
-		
+
 	except KeyboardInterrupt:
 
 			move.motorStop()

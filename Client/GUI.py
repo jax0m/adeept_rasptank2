@@ -4,19 +4,21 @@
 # Author      : Adeept
 # Date		  : 2025/04/28
 
-from socket import *
-import sys
-import time
-import threading as thread
-import tkinter as tk
-import math
 import json
+import math
 import subprocess
+import sys
+import threading as thread
+import time
+import tkinter as tk
+from socket import *
+
 try:
-	import cv2
-	import zmq
 	import base64
+
+	import cv2
 	import numpy as np
+	import zmq
 except:
 	print("Couldn't import OpenCV, you need to install it first.")
 
@@ -135,7 +137,7 @@ def opencv_r():
 			source = cv2.imdecode(npimg, 1)
 			cv2.putText(source,('PC FPS: %s'%fps),(40,20), font, 0.5,(255,255,255),1,cv2.LINE_AA)
 
-			
+
 			try:
 				cv2.putText(source,('CPU Temperature: %s'%CPU_TEP),(370,350), font, 0.5,(128,255,128),1,cv2.LINE_AA)
 				cv2.putText(source,('CPU Usage: %s'%CPU_USE),(370,380), font, 0.5,(128,255,128),1,cv2.LINE_AA)
@@ -153,7 +155,7 @@ def opencv_r():
 
 			if advanced_OSD:#1
 				advanced_OSD_add(source, OSD_X, OSD_Y)
-			
+
 			#cv2.putText(source,('%sm'%ultra_data),(210,290), font, 0.5,(255,255,255),1,cv2.LINE_AA)
 			cv2.imshow("Stream", source)
 			cv2.setMouseCallback("Stream", getposBgr)
@@ -201,7 +203,7 @@ def connection_thread():
 				RAM_lab.config(text='RAM Usage: %s'%cpu_info[2])
 			except Exception as e:
 				print('get_info error: not A JSON ' + str(e))
-				
+
 		elif 'Switch_3_on' in car_info:
 			Switch_3 = 1
 			Btn_Switch_3.config(bg='#4CAF50')
@@ -274,15 +276,15 @@ def connection_thread():
 				pass
 
 
-def Info_receive():	
+def Info_receive():
 	while 1:
 		try:
-			tcpClicSock.send('get_info'.encode())
+			tcpClicSock.send(b'get_info')
 			time.sleep(3)
 		except Exception as e:
 			print("get_info error: " + str(e))
 			break
-			
+
 
 
 def socket_connect():	 #Call this function to connect with the server
@@ -295,9 +297,9 @@ def socket_connect():	 #Call this function to connect with the server
 		l_ip_4.config(bg='#FF8F00')
 		l_ip_5.config(text='Default:%s'%ip_adr)
 		pass
-	
+
 	SERVER_IP = ip_adr
-	SERVER_PORT = 10223   #Define port serial 
+	SERVER_PORT = 10223   #Define port serial
 	BUFSIZ = 1024		 #Define buffer size
 	ADDR = (SERVER_IP, SERVER_PORT)
 	tcpClicSock = socket(AF_INET, SOCK_STREAM) #Set connection value for socket
@@ -308,9 +310,9 @@ def socket_connect():	 #Call this function to connect with the server
 			print("Connecting to server @ %s:%d..." %(SERVER_IP, SERVER_PORT))
 			print("Connecting")
 			tcpClicSock.connect(ADDR)		#Connection with the server
-		
+
 			print("Connected")
-		
+
 			l_ip_5.config(text='IP:%s'%ip_adr)
 			l_ip_4.config(text='Connected')
 			l_ip_4.config(bg='#558B2F')
@@ -318,20 +320,20 @@ def socket_connect():	 #Call this function to connect with the server
 			replace_num('IP:',ip_adr)
 			E1.config(state='disabled')	  #Disable the Entry
 			Btn14.config(state='disabled')   #Disable the Entry
-			
+
 			ip_stu=0						 #'0' means connected
 
 			connection_threading=thread.Thread(target=connection_thread)		 #Define a thread for FPV and OpenCV
-			connection_threading.setDaemon(True)							 
-			connection_threading.start()									 
+			connection_threading.setDaemon(True)
+			connection_threading.start()
 
-			info_threading=thread.Thread(target=Info_receive)		 #get CPU info 
-			info_threading.setDaemon(True)							 
-			info_threading.start()									 
+			info_threading=thread.Thread(target=Info_receive)		 #get CPU info
+			info_threading.setDaemon(True)
+			info_threading.start()
 
 			video_threading=thread.Thread(target=run_open)		 #Define a thread for FPV and OpenCV
-			video_threading.daemon = True					 
-			video_threading.start()									 
+			video_threading.daemon = True
+			video_threading.start()
 
 			break
 		else:
@@ -364,89 +366,89 @@ def servo_buttons(x,y):
 	def call_A_up(event):
 		global UD_stu
 		if UD_stu == 0:
-			tcpClicSock.send(('armUp').encode())
+			tcpClicSock.send(b'armUp')
 			UD_stu = 1
 
 	def call_A_down(event):
 		global UD_stu
 		if UD_stu == 0:
-			tcpClicSock.send(('armDown').encode())
+			tcpClicSock.send(b'armDown')
 			UD_stu = 1
 
 	def call_A_stop(event):
 		global UD_stu
-		tcpClicSock.send(('armStop').encode())
+		tcpClicSock.send(b'armStop')
 		UD_stu = 0
 
 
 	def call_lookleft(event):
 		global PT_stu
 		if PT_stu == 0:
-			tcpClicSock.send(('lookleft').encode())
+			tcpClicSock.send(b'lookleft')
 			PT_stu = 1
 
 	def call_lookright(event):
 		global PT_stu
 		if PT_stu == 0:
-			tcpClicSock.send(('lookright').encode())
+			tcpClicSock.send(b'lookright')
 			PT_stu = 1
 
 	def call_LRstop(event):
 		global PT_stu
-		tcpClicSock.send(('LRstop').encode())
+		tcpClicSock.send(b'LRstop')
 		PT_stu = 0
 
 
 	def call_handup(event):
 		global HA_stu
 		if HA_stu == 0:
-			tcpClicSock.send(('handUp').encode())
+			tcpClicSock.send(b'handUp')
 			HA_stu = 1
 
 	def call_handdown(event):
 		global HA_stu
 		if HA_stu == 0:
-			tcpClicSock.send(('handDown').encode())
+			tcpClicSock.send(b'handDown')
 			HA_stu = 1
 
 	def call_HAstop(event):
 		global HA_stu
-		tcpClicSock.send(('handStop').encode())
+		tcpClicSock.send(b'handStop')
 		HA_stu = 0
 
 
 	def call_grab(event):
 		global GA_stu
 		if GA_stu == 0:
-			tcpClicSock.send(('grab').encode())
+			tcpClicSock.send(b'grab')
 			GA_stu = 1
 
 	def call_loose(event):
 		global GA_stu
 		if GA_stu == 0:
-			tcpClicSock.send(('loose').encode())
+			tcpClicSock.send(b'loose')
 			GA_stu = 1
 
 	def call_stop(event):
 		global GA_stu
-		tcpClicSock.send(('GLstop').encode())
+		tcpClicSock.send(b'GLstop')
 		GA_stu = 0
 
 	def call_up(event):
 		global GA_stu
 		if GA_stu == 0:
-			tcpClicSock.send(('up').encode())
+			tcpClicSock.send(b'up')
 			GA_stu = 1
 
 	def call_down(event):
 		global GA_stu
 		if GA_stu == 0:
-			tcpClicSock.send(('down').encode())
+			tcpClicSock.send(b'down')
 			GA_stu = 1
 
 	def call_UDstop(event):
 		global GA_stu
-		tcpClicSock.send(('UDstop').encode())
+		tcpClicSock.send(b'UDstop')
 		GA_stu = 0
 
 	Btn_0 = tk.Button(root, width=8, text='A_Left',fg=color_text,bg=color_btn,relief='ridge')
@@ -461,7 +463,7 @@ def servo_buttons(x,y):
 	Btn_1.bind('<ButtonPress-1>', call_A_up)
 	Btn_1.bind('<ButtonRelease-1>', call_A_stop)
 	root.bind('<KeyPress-r>', call_A_up)
-	root.bind('<KeyRelease-r>', call_A_stop) 
+	root.bind('<KeyRelease-r>', call_A_stop)
 
 	Btn_1 = tk.Button(root, width=8, text='A_Down',fg=color_text,bg=color_btn,relief='ridge')
 	Btn_1.place(x=x+70,y=y+35)
@@ -474,28 +476,28 @@ def servo_buttons(x,y):
 	Btn_2.place(x=x+140,y=y+35)
 	Btn_2.bind('<ButtonPress-1>', call_lookright)
 	Btn_2.bind('<ButtonRelease-1>', call_LRstop)
-	root.bind('<KeyPress-l>', call_lookright) 
+	root.bind('<KeyPress-l>', call_lookright)
 	root.bind('<KeyRelease-l>', call_LRstop)
 
 	Btn_3 = tk.Button(root, width=8, text='Grab',fg=color_text,bg=color_btn,relief='ridge')
 	Btn_3.place(x=x,y=y)
 	Btn_3.bind('<ButtonPress-1>', call_grab)
 	Btn_3.bind('<ButtonRelease-1>', call_stop)
-	root.bind('<KeyPress-u>', call_grab) 
-	root.bind('<KeyRelease-u>', call_stop) 
+	root.bind('<KeyPress-u>', call_grab)
+	root.bind('<KeyRelease-u>', call_stop)
 
 	Btn_4 = tk.Button(root, width=8, text='Loose',fg=color_text,bg=color_btn,relief='ridge')
 	Btn_4.place(x=x+140,y=y)
 	Btn_4.bind('<ButtonPress-1>', call_loose)
 	Btn_4.bind('<ButtonRelease-1>', call_stop)
-	root.bind('<KeyPress-o>', call_loose) 
+	root.bind('<KeyPress-o>', call_loose)
 	root.bind('<KeyRelease-o>', call_stop)
 
 	Btn_5 = tk.Button(root, width=8, text='H_Down',fg=color_text,bg=color_btn,relief='ridge')
 	Btn_5.place(x=x,y=y-55)
 	Btn_5.bind('<ButtonPress-1>', call_handdown)
 	Btn_5.bind('<ButtonRelease-1>', call_HAstop)
-	root.bind('<KeyPress-;>', call_handdown) 
+	root.bind('<KeyPress-;>', call_handdown)
 	root.bind('<KeyRelease-;>', call_HAstop)
 
 	Btn_6 = tk.Button(root, width=8, text='H_Up',fg=color_text,bg=color_btn,relief='ridge')
@@ -511,58 +513,58 @@ def motor_buttons(x,y):
 	def call_left(event):
 		global TS_stu
 		if TS_stu == 0:
-			tcpClicSock.send(('left').encode())
+			tcpClicSock.send(b'left')
 			TS_stu = 1
 
 	def call_right(event):
 		global TS_stu
 		if TS_stu == 0:
-			tcpClicSock.send(('right').encode())
+			tcpClicSock.send(b'right')
 			TS_stu = 1
 
 	def call_forward(event):
 		global DS_stu
 		if DS_stu == 0:
-			tcpClicSock.send(('forward').encode())
+			tcpClicSock.send(b'forward')
 			DS_stu = 1
 
 	def call_backward(event):
 		global DS_stu
 		if DS_stu == 0:
-			tcpClicSock.send(('backward').encode())
+			tcpClicSock.send(b'backward')
 			DS_stu = 1
 
 	def call_DS(event):
 		global DS_stu
-		tcpClicSock.send(('DS').encode())
+		tcpClicSock.send(b'DS')
 		DS_stu = 0
 
 	def call_TS(event):
 		global TS_stu
-		tcpClicSock.send(('TS').encode())
+		tcpClicSock.send(b'TS')
 		TS_stu = 0
 
 	def call_UP(event):
-		tcpClicSock.send(('up').encode())
+		tcpClicSock.send(b'up')
 
 	def call_DOWN(event):
-		tcpClicSock.send(('down').encode())
+		tcpClicSock.send(b'down')
 	def call_UDstop(event):
-		tcpClicSock.send(('UDstop').encode())
+		tcpClicSock.send(b'UDstop')
 	Btn_UP = tk.Button(root, width=8, text='UP',fg=color_text,bg=color_btn,relief='ridge')
 	Btn_UP.place(x=x,y=y)
 	Btn_UP.bind('<ButtonPress-1>', call_UP)
 	Btn_UP.bind('<ButtonRelease-1>', call_UDstop)
 	root.bind('<KeyPress-i>', call_UP)
-	root.bind('<KeyRelease-i>', call_UDstop) 
- 
+	root.bind('<KeyRelease-i>', call_UDstop)
+
 	Btn_DOWN = tk.Button(root, width=8, text='DOWN',fg=color_text,bg=color_btn,relief='ridge')
 	Btn_DOWN.place(x=x+140,y=y)
 	Btn_DOWN.bind('<ButtonPress-1>', call_DOWN)
 	Btn_DOWN.bind('<ButtonRelease-1>', call_UDstop)
 	root.bind('<KeyPress-k>', call_DOWN)
-	root.bind('<KeyRelease-k>', call_UDstop) 
- 
+	root.bind('<KeyRelease-k>', call_UDstop)
+
 	Btn_0 = tk.Button(root, width=8, text='Left',fg=color_text,bg=color_btn,relief='ridge')
 	Btn_0.place(x=x,y=y+35)
 	Btn_0.bind('<ButtonPress-1>', call_left)
@@ -575,7 +577,7 @@ def motor_buttons(x,y):
 	Btn_1.bind('<ButtonPress-1>', call_forward)
 	Btn_1.bind('<ButtonRelease-1>', call_DS)
 	root.bind('<KeyPress-w>', call_forward)
-	root.bind('<KeyRelease-w>', call_DS) 
+	root.bind('<KeyRelease-w>', call_DS)
 
 	Btn_1 = tk.Button(root, width=8, text='Backward',fg=color_text,bg=color_btn,relief='ridge')
 	Btn_1.place(x=x+70,y=y+35)
@@ -588,8 +590,8 @@ def motor_buttons(x,y):
 	Btn_2.place(x=x+140,y=y+35)
 	Btn_2.bind('<ButtonPress-1>', call_right)
 	Btn_2.bind('<ButtonRelease-1>', call_TS)
-	root.bind('<KeyPress-d>', call_right) 
-	root.bind('<KeyRelease-d>', call_TS) 
+	root.bind('<KeyPress-d>', call_right)
+	root.bind('<KeyRelease-d>', call_TS)
 
 
 def information_screen(x,y):
@@ -632,30 +634,30 @@ def switch_button(x,y):
 	def call_Switch_1(event):
 		global Btn_Switch_1
 		if Btn_Switch_1 == 0:
-			tcpClicSock.send(('Switch_1_on').encode())
+			tcpClicSock.send(b'Switch_1_on')
 			Btn_Switch_1 = 1
 		else:
-			tcpClicSock.send(('Switch_1_off').encode())
+			tcpClicSock.send(b'Switch_1_off')
 			Btn_Switch_1 = 0
 
 
 	def call_Switch_2(event):
 		global Btn_Switch_2
 		if Btn_Switch_2 == 0:
-			tcpClicSock.send(('Switch_2_on').encode())
+			tcpClicSock.send(b'Switch_2_on')
 			Btn_Switch_2 = 1
 		else:
-			tcpClicSock.send(('Switch_2_off').encode())
+			tcpClicSock.send(b'Switch_2_off')
 			Btn_Switch_2 = 0
 
 
 	def call_Switch_3(event):
 		global Btn_Switch_3
 		if Btn_Switch_3 == 0:
-			tcpClicSock.send(('Switch_3_on').encode())
+			tcpClicSock.send(b'Switch_3_on')
 			Btn_Switch_3 = 1
 		else:
-			tcpClicSock.send(('Switch_3_off').encode())
+			tcpClicSock.send(b'Switch_3_off')
 			Btn_Switch_3 = 0
 
 	Btn_Switch_1 = tk.Button(root, width=8, text='Port 1',fg=color_text,bg=color_btn,relief='ridge')
@@ -705,18 +707,18 @@ def scale_FL(x,y,w):
 	def call_CVFL(event):
 		global function_stu
 		if function_stu == 0:
-			tcpClicSock.send(('CVFL').encode())
+			tcpClicSock.send(b'CVFL')
 			function_stu = 1
 		else:
-			tcpClicSock.send(('stopCV').encode())
+			tcpClicSock.send(b'stopCV')
 			function_stu = 0
 	def call_WB(event):
 		global function_stu
 		if function_stu == 0:
-			tcpClicSock.send(('CVFLColorSet 0').encode())
+			tcpClicSock.send(b'CVFLColorSet 0')
 			function_stu = 1
 		else:
-			tcpClicSock.send(('CVFLColorSet 255').encode())
+			tcpClicSock.send(b'CVFLColorSet 255')
 			function_stu = 0
 
 	Scale_lip1 = tk.Scale(root,label=None,
@@ -806,46 +808,46 @@ def function_buttons(x,y):
 	def call_function_2(event):
 		global function_stu
 		if function_stu == 0:
-			tcpClicSock.send(('findColor').encode())
+			tcpClicSock.send(b'findColor')
 			function_stu = 1
 		else:
-			tcpClicSock.send(('stopCV').encode())
+			tcpClicSock.send(b'stopCV')
 			function_stu = 0
 
 	def call_function_3(event):
 		global function_stu
 		if function_stu == 0:
-			tcpClicSock.send(('motionGet').encode())
+			tcpClicSock.send(b'motionGet')
 			function_stu = 1
 		else:
-			tcpClicSock.send(('stopCV').encode())
+			tcpClicSock.send(b'stopCV')
 			function_stu = 0
 
 	def call_function_4(event):
 		global function_stu
 		if function_stu == 0:
-			tcpClicSock.send(('police').encode())
+			tcpClicSock.send(b'police')
 			function_stu = 1
 		else:
-			tcpClicSock.send(('policeOff').encode())
+			tcpClicSock.send(b'policeOff')
 			function_stu = 0
 
 	def call_function_5(event):
 		global function_stu
 		if function_stu == 0:
-			tcpClicSock.send(('automatic').encode())
+			tcpClicSock.send(b'automatic')
 			function_stu = 1
 		else:
-			tcpClicSock.send(('automaticOff').encode())
+			tcpClicSock.send(b'automaticOff')
 			function_stu = 0
 
 	def call_function_1(event):
 		global function_stu
 		if function_stu == 0:
-			tcpClicSock.send(('trackLine').encode())
+			tcpClicSock.send(b'trackLine')
 			function_stu = 1
 		else:
-			tcpClicSock.send(('trackLineOff').encode())
+			tcpClicSock.send(b'trackLineOff')
 			function_stu = 0
 
 
@@ -874,31 +876,31 @@ def function_buttons(x,y):
 
 def config_buttons(x,y):
 	def call_SiLeft(event):
-		tcpClicSock.send(('SiLeft 0').encode())
+		tcpClicSock.send(b'SiLeft 0')
 
 	def call_SiRight(event):
-		tcpClicSock.send(('SiRight 0').encode())
+		tcpClicSock.send(b'SiRight 0')
 
 	def call_SetGearMiddle(event):
-		tcpClicSock.send(('PWMMS 0').encode())
+		tcpClicSock.send(b'PWMMS 0')
 
 	def call_PWM1MS(event):
-		tcpClicSock.send(('PWMMS 1').encode())
+		tcpClicSock.send(b'PWMMS 1')
 
 	def call_PWM2MS(event):
-		tcpClicSock.send(('PWMMS 2').encode())
+		tcpClicSock.send(b'PWMMS 2')
 
 	def call_PWM3MS(event):
-		tcpClicSock.send(('PWMMS 3').encode())
+		tcpClicSock.send(b'PWMMS 3')
 
 	def call_PWM4MS(event):
-		tcpClicSock.send(('PWMMS 4').encode())
+		tcpClicSock.send(b'PWMMS 4')
 
 	def call_MoveInit(event):
-		tcpClicSock.send(('PWMINIT').encode())
+		tcpClicSock.send(b'PWMINIT')
 
 	def call_PWMDefault(event):
-		tcpClicSock.send(('PWMD').encode())
+		tcpClicSock.send(b'PWMD')
 
 	Btn_SiLeft = tk.Button(root, width=16, text='<PWM0 Turn Left',fg=color_text,bg=color_btn,relief='ridge')
 	Btn_SiLeft.place(x=x,y=y)
@@ -940,10 +942,10 @@ def config_buttons(x,y):
 
 def loop():
 	global root, var_lip1, var_lip2, var_err, var_R, var_G, var_B, var_ec#Z
-	root = tk.Tk()			
-	root.title('Adeept RaspTank')	  
+	root = tk.Tk()
+	root.title('Adeept RaspTank')
 	root.geometry('920x570')  #Z
-	root.config(bg=color_bg)  
+	root.config(bg=color_bg)
 
 	var_lip1 = tk.StringVar()
 	var_lip1.set(440)

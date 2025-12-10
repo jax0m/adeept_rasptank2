@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-# coding=utf-8
 # File name   : setup.py
 # Author      : Devin
 
@@ -25,7 +24,7 @@ def replace_num(file, initial, new_num):
     newline = ""
     str_num = str(new_num)
     try:
-        with open(file, "r") as f:
+        with open(file) as f:
             for line in f.readlines():
                 if line.strip().startswith(initial):
                     line = str_num + '\n'
@@ -43,7 +42,7 @@ def replace_num(file, initial, new_num):
 # Handles exceptions gracefully
 def validate_config(file, expected_lines):
     try:
-        with open(file, "r") as f:
+        with open(file) as f:
             content = f.read()
         return all(line in content for line in expected_lines)
     except:
@@ -56,18 +55,18 @@ def validate_config(file, expected_lines):
 def check_config_file():
     # Check for both possible config file locations
     config_locations = ["/boot/config.txt", "/boot/firmware/config.txt"]
-    
+
     # Try to find a valid config file
     config_path = None
     for path in config_locations:
         if os.path.exists(path):
             config_path = path
             break
-    
+
     if not config_path:
         print("Error: Neither /boot/config.txt nor /boot/firmware/config.txt exists.")
         return None
-    
+
     return config_path
 
 # Function to enable I2C and start_x in the Raspberry Pi config file
@@ -79,18 +78,18 @@ def enable_i2c_and_start_x():
     config_path = check_config_file()
     if not config_path:
         return False
-    
+
     # Check if we need to make changes
     required_lines = ["dtparam=i2c_arm=on", "start_x=1"]
-    
+
     # First check if all required lines are already present
     if validate_config(config_path, required_lines):
         print("I2C and start_x are already enabled in the config file.")
         return True
-    
+
     # Try to modify the file
     success = replace_num(config_path, '#dtparam=i2c_arm=on', 'dtparam=i2c_arm=on\nstart_x=1\n')
-    
+
     if success:
         # Validate the changes were made
         if validate_config(config_path, required_lines):
@@ -106,10 +105,10 @@ def enable_i2c_and_start_x():
 # Function to check the Raspberry Pi OS version from /etc/os-release
 # Reads the VERSION_ID from /etc/os-release and returns it as an integer
 # Returns 12 as default if there's an error reading the file
-# Used to determine which set of pip commands to use based on the OS version    
+# Used to determine which set of pip commands to use based on the OS version
 def check_raspbain_version():
     try:
-        with open('/etc/os-release', 'r') as f:
+        with open('/etc/os-release') as f:
             for line in f:
                 if line.startswith('VERSION_ID='):
                     version = line.strip().split('=')[1]

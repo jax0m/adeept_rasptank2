@@ -4,24 +4,22 @@
 # Website     : www.adeept.com
 # Author      : devin
 
-import time
-import threading
-import move
-import os
-import info
-import RPIservo
-
-import functions
-import robotLight
-import switch
-import socket
-
 #websocket
 import asyncio
-import websockets
-
 import json
+import os
+import socket
+import threading
+import time
+
 import app
+import functions
+import info
+import move
+import robotLight
+import RPIservo
+import switch
+import websockets
 
 OLED_connection = 0
 
@@ -83,7 +81,7 @@ def replace_num(initial,new_num):   #Call this function to replace data in '.txt
     global r
     newline=""
     str_num=str(new_num)
-    with open(thisPath+"/RPIservo.py","r") as f:
+    with open(thisPath+"/RPIservo.py") as f:
         for line in f.readlines():
             if(line.find(initial) == 0):
                 line = initial+"%s" %(str_num+"\n")
@@ -181,7 +179,7 @@ def switchCtrl(command_input, response):
         switch.switch(3,1)
 
     elif 'Switch_3_off' in command_input:
-        switch.switch(3,0) 
+        switch.switch(3,0)
 
 
 def robotCtrl(command_input, response):
@@ -190,7 +188,7 @@ def robotCtrl(command_input, response):
         direction_command = 'forward'
         move.move(speed_set, 1, "mid")
         print("1111")
-    
+
     elif 'backward' == command_input:
         direction_command = 'backward'
         move.move(speed_set, -1, "no")
@@ -342,7 +340,7 @@ def configPWM(command_input, response):
 def update_code():
     # Update local to be consistent with remote
     projectPath = thisPath[:-7]
-    with open(f'{projectPath}/config.json', 'r') as f1:
+    with open(f'{projectPath}/config.json') as f1:
         config = json.load(f1)
         if not config['production']:
             print('Update code')
@@ -351,7 +349,7 @@ def update_code():
                 print('Update successfully')
                 print('Restarting...')
                 os.system('sudo reboot')
-            
+
 def wifi_check():
     try:
         s =socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
@@ -382,7 +380,7 @@ async def check_permit(websocket):
 async def recv_msg(websocket):
     global speed_set, modeSelect
 
-    while True: 
+    while True:
         response = {
             'status' : 'ok',
             'title' : '',
@@ -456,12 +454,12 @@ async def main_logic(websocket, path):
 if __name__ == '__main__':
     switch.switchSetup()
     switch.set_all_switch_off()
-    
+
     move.setup()
     WS2812_mark = None
 
     HOST = ''
-    PORT = 10223                              #Define port serial 
+    PORT = 10223                              #Define port serial
     BUFSIZ = 1024                             #Define buffer size
     ADDR = (HOST, PORT)
 

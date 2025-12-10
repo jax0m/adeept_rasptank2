@@ -1,12 +1,14 @@
 #!/usr/bin/env python
-from importlib import import_module
 import os
-from flask import Flask, render_template, Response, send_from_directory
-from flask_cors import *
-# import camera driver
+import threading
+from importlib import import_module
 
 from camera_opencv import Camera
-import threading
+from flask import Flask, Response, render_template, send_from_directory
+from flask_cors import *
+
+# import camera driver
+
 
 # Raspberry Pi camera module (requires picamera package)
 # from camera_pi import Camera

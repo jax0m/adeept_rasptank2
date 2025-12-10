@@ -1,6 +1,7 @@
-import time
-from rpi_ws281x import *
 import argparse
+import time
+
+from rpi_ws281x import *
 
 # LED strip configuration:
 LED_COUNT      = 14      # Number of LED pixels.
@@ -64,7 +65,7 @@ def run_command(cmd=""):
     result = p.stdout.read().decode('utf-8')
     status = p.poll()
     return status, result
-    
+
 if __name__ == '__main__':
     try:
       value = 1
@@ -78,5 +79,3 @@ if __name__ == '__main__':
         run()
     except KeyboardInterrupt:
       colorWipe(0, 0, 0)
-
-

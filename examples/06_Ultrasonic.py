@@ -1,5 +1,6 @@
-from gpiozero import DistanceSensor
 from time import sleep
+
+from gpiozero import DistanceSensor
 
 Tr = 23
 Ec = 24
@@ -11,6 +12,6 @@ def checkdist():
 
 if __name__ == "__main__":
     while True:
-        distance = checkdist() 
+        distance = checkdist()
         print("%.2f cm" %distance)
         sleep(0.05)
