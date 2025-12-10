@@ -8,10 +8,11 @@
 # sudo pip3 install adafruit-circuitpython-pca9685
 '''
 import time
-from board import SCL, SDA
+
 import busio
 from adafruit_motor import servo
 from adafruit_pca9685 import PCA9685
+from board import SCL, SDA
 
 i2c = busio.I2C(SCL, SDA)
 # Create a simple PCA9685 class instance.

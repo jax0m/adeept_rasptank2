@@ -5,7 +5,9 @@
 # Date        : 2024/03/10
 
 import time
+
 from gpiozero import LED
+
 
 def switchSetup():
     global led1,led2,led3

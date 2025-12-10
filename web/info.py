@@ -6,11 +6,12 @@
 # Date        : 2019/08/28
 import psutil
 
+
 def get_cpu_tempfunc():
     """ Return CPU temperature """
     result = 0
     mypath = "/sys/class/thermal/thermal_zone0/temp"
-    with open(mypath, 'r') as mytmpfile:
+    with open(mypath) as mytmpfile:
         for line in mytmpfile:
             result = line
 
