@@ -25,8 +25,8 @@ mark_test = 0
 speed_set = 25
 turnWiggle = 60
 
-direction_command = 'no'
-turn_command = 'no'
+direction_command = "no"
+turn_command = "no"
 
 
 scGear = RPIservo.ServoCtrl()
@@ -51,30 +51,31 @@ fuc.start()
 curpath = os.path.realpath(__file__)
 thisPath = "/" + os.path.dirname(curpath)
 
+
 def servoPosInit():
-    scGear.initConfig(0,init_pwm[0],1)
-    scGear.initConfig(1,init_pwm[1],1)
-    scGear.initConfig(2,init_pwm[2],1)
-    scGear.initConfig(3,init_pwm[3],1)
-    scGear.initConfig(4,init_pwm[4],1)
+    scGear.initConfig(0, init_pwm[0], 1)
+    scGear.initConfig(1, init_pwm[1], 1)
+    scGear.initConfig(2, init_pwm[2], 1)
+    scGear.initConfig(3, init_pwm[3], 1)
+    scGear.initConfig(4, init_pwm[4], 1)
 
 
-def replace_num(initial,new_num):   #Call this function to replace data in '.txt' file
+def replace_num(initial, new_num):  # Call this function to replace data in '.txt' file
     global r
-    newline=""
-    str_num=str(new_num)
-    with open(thisPath+"/RPIservo.py") as f:
+    newline = ""
+    str_num = str(new_num)
+    with open(thisPath + "/RPIservo.py") as f:
         for line in f.readlines():
-            if(line.find(initial) == 0):
-                line = initial+"%s" %(str_num+"\n")
+            if line.find(initial) == 0:
+                line = initial + "%s" % (str_num + "\n")
             newline += line
-    with open(thisPath+"/RPIservo.py","w") as f:
+    with open(thisPath + "/RPIservo.py", "w") as f:
         f.writelines(newline)
 
 
 def FPV_thread():
     global fpv
-    fpv=FPV.FPV()
+    fpv = FPV.FPV()
     fpv.capture_thread(addr[0])
 
 
@@ -83,142 +84,140 @@ def ap_thread():
 
 
 def functionSelect(command_input, response):
-    if 'findColor' == command_input:
+    if "findColor" == command_input:
         fpv.FindColor(1)
-        tcpCliSock.send(b'FindColor')
+        tcpCliSock.send(b"FindColor")
 
-    elif 'motionGet' == command_input:
+    elif "motionGet" == command_input:
         fpv.WatchDog(1)
-        tcpCliSock.send(b'WatchDog')
+        tcpCliSock.send(b"WatchDog")
 
-    elif 'stopCV' == command_input:
+    elif "stopCV" == command_input:
         fpv.FindColor(0)
         fpv.WatchDog(0)
         FPV.FindLineMode = 0
         time.sleep(0.5)
         move.motorStop()
-        switch.switch(1,0)
-        switch.switch(2,0)
-        switch.switch(3,0)
+        switch.switch(1, 0)
+        switch.switch(2, 0)
+        switch.switch(3, 0)
 
-    elif 'police' == command_input:
+    elif "police" == command_input:
         if ws2812_mark:
             ws2812.police()
 
-
-    elif 'policeOff' == command_input:
+    elif "policeOff" == command_input:
         if ws2812_mark:
-            ws2812.breath(70,70,255)
+            ws2812.breath(70, 70, 255)
 
-    elif 'automatic' == command_input:
+    elif "automatic" == command_input:
         fuc.automatic()
 
-    elif 'automaticOff' == command_input:
+    elif "automaticOff" == command_input:
         fuc.pause()
         time.sleep(0.5)
         move.motorStop()
 
-    elif 'trackLine' == command_input:
+    elif "trackLine" == command_input:
         servoPosInit()
         fuc.trackLine()
 
-    elif 'trackLineOff' == command_input:
+    elif "trackLineOff" == command_input:
         fuc.pause()
         time.sleep(0.5)
         move.motorStop()
 
 
 def switchCtrl(command_input):
-    if 'Switch_1_on' in command_input:
-        switch.switch(1,1)
+    if "Switch_1_on" in command_input:
+        switch.switch(1, 1)
 
-    elif 'Switch_1_off' in command_input:
-        switch.switch(1,0)
+    elif "Switch_1_off" in command_input:
+        switch.switch(1, 0)
 
-    elif 'Switch_2_on' in command_input:
-        switch.switch(2,1)
+    elif "Switch_2_on" in command_input:
+        switch.switch(2, 1)
 
-    elif 'Switch_2_off' in command_input:
-        switch.switch(2,0)
+    elif "Switch_2_off" in command_input:
+        switch.switch(2, 0)
 
-    elif 'Switch_3_on' in command_input:
-        switch.switch(3,1)
+    elif "Switch_3_on" in command_input:
+        switch.switch(3, 1)
 
-    elif 'Switch_3_off' in command_input:
-        switch.switch(3,0)
+    elif "Switch_3_off" in command_input:
+        switch.switch(3, 0)
 
 
 def robotCtrl(command_input):
     global direction_command, turn_command
-    if 'forward' == command_input:
-        direction_command = 'forward'
+    if "forward" == command_input:
+        direction_command = "forward"
         move.move(speed_set, 1, "mid")
 
-    elif 'backward' == command_input:
-        direction_command = 'backward'
+    elif "backward" == command_input:
+        direction_command = "backward"
         move.move(speed_set, -1, "mid")
 
-    elif 'DS' in command_input:
-        direction_command = 'no'
+    elif "DS" in command_input:
+        direction_command = "no"
         move.motorStop()
 
-    elif 'left' == command_input:
-        turn_command = 'left'
+    elif "left" == command_input:
+        turn_command = "left"
         move.move(speed_set, 1, "left")
 
-    elif 'right' == command_input:
-        turn_command = 'right'
+    elif "right" == command_input:
+        turn_command = "right"
         move.move(speed_set, 1, "right")
 
-    elif 'TS' in command_input:
-        turn_command = 'no'
+    elif "TS" in command_input:
+        turn_command = "no"
         move.motorStop()
 
-    elif 'armUp' == command_input:
-        scGear.singleServo(0,  1, 2)
+    elif "armUp" == command_input:
+        scGear.singleServo(0, 1, 2)
 
-    elif 'armDown' == command_input:
+    elif "armDown" == command_input:
         scGear.singleServo(0, -1, 2)
 
-    elif 'armStop' in command_input:
+    elif "armStop" in command_input:
         scGear.stopWiggle()
 
-    elif 'handUp' == command_input:
+    elif "handUp" == command_input:
         scGear.singleServo(1, -1, 2)
 
-    elif 'handDown' == command_input:
-        scGear.singleServo(1,  1, 2)
+    elif "handDown" == command_input:
+        scGear.singleServo(1, 1, 2)
 
-    elif 'handStop' in command_input:
+    elif "handStop" in command_input:
         scGear.stopWiggle()
 
-    elif 'lookleft' == command_input:
-        scGear.singleServo(2,  1, 2)
+    elif "lookleft" == command_input:
+        scGear.singleServo(2, 1, 2)
 
-    elif 'lookright' == command_input:
+    elif "lookright" == command_input:
         scGear.singleServo(2, -1, 2)
 
-    elif 'LRstop' in command_input:
+    elif "LRstop" in command_input:
         scGear.stopWiggle()
 
-    elif 'grab' == command_input:
-        scGear.singleServo(3,  1, 2)
+    elif "grab" == command_input:
+        scGear.singleServo(3, 1, 2)
 
-    elif 'loose' == command_input:
+    elif "loose" == command_input:
         scGear.singleServo(3, -1, 2)
 
-    elif 'GLstop' == command_input:
+    elif "GLstop" == command_input:
         scGear.stopWiggle()
 
-    elif 'up' == command_input: # camera
+    elif "up" == command_input:  # camera
         scGear.singleServo(4, -1, 1)
-    elif 'down' == command_input:
-        scGear.singleServo(4,  1, 1)
-    elif 'UDstop' in command_input:
+    elif "down" == command_input:
+        scGear.singleServo(4, 1, 1)
+    elif "UDstop" in command_input:
         scGear.stopWiggle()
 
-
-    elif 'home' == command_input:
+    elif "home" == command_input:
         scGear.moveServoInit([0])
         scGear.moveServoInit([1])
         scGear.moveServoInit([2])
@@ -229,84 +228,84 @@ def robotCtrl(command_input):
 def configPWM(command_input):
     global init_pwm0, init_pwm1, init_pwm2, init_pwm3, init_pwm4
 
-    if 'SiLeft' in command_input:
+    if "SiLeft" in command_input:
         numServo = int(command_input[7:])
         if numServo == 0:
             init_pwm0 -= 1
-            scGear.setPWM(0,init_pwm0)
+            scGear.setPWM(0, init_pwm0)
         elif numServo == 1:
             init_pwm1 -= 1
-            scGear.setPWM(1,init_pwm1)
+            scGear.setPWM(1, init_pwm1)
         elif numServo == 2:
             init_pwm2 -= 1
-            scGear.setPWM(2,init_pwm2)
+            scGear.setPWM(2, init_pwm2)
         elif numServo == 3:
             init_pwm3 -= 1
-            scGear.setPWM(3,init_pwm3)
+            scGear.setPWM(3, init_pwm3)
         elif numServo == 4:
             init_pwm4 -= 1
-            scGear.setPWM(4,init_pwm4)
+            scGear.setPWM(4, init_pwm4)
 
-    if 'SiRight' in command_input:
+    if "SiRight" in command_input:
         numServo = int(command_input[8:])
         if numServo == 0:
             print(numServo)
             init_pwm0 += 1
-            scGear.setPWM(0,init_pwm0)
+            scGear.setPWM(0, init_pwm0)
         elif numServo == 1:
             init_pwm1 += 1
-            scGear.setPWM(1,init_pwm1)
+            scGear.setPWM(1, init_pwm1)
         elif numServo == 2:
             init_pwm2 += 1
-            scGear.setPWM(2,init_pwm2)
+            scGear.setPWM(2, init_pwm2)
         elif numServo == 3:
             init_pwm3 += 1
-            scGear.setPWM(3,init_pwm3)
+            scGear.setPWM(3, init_pwm3)
         elif numServo == 4:
             init_pwm4 += 1
-            scGear.setPWM(4,init_pwm4)
+            scGear.setPWM(4, init_pwm4)
 
-    if 'PWMMS' in command_input:
+    if "PWMMS" in command_input:
         numServo = int(command_input[6:])
         scGear.moveAngle(numServo, 0)
 
-    if 'PWMINIT' == command_input:
+    if "PWMINIT" == command_input:
         init_pwm0 = 90
         for i in range(5):
             scGear.moveAngle(i, 0)
             scGear.nowPos[i] = 90
-    elif 'PWMD' in command_input:
+    elif "PWMD" in command_input:
         init_pwm0 = 90
         for i in range(5):
             scGear.moveAngle(i, 0)
             scGear.nowPos[i] = 90
-
 
 
 def wifi_check():
     global mark_test
     try:
         time.sleep(3)
-        s =socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-        s.connect(("1.1.1.1",80))
-        ipaddr_check=s.getsockname()[0]
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("1.1.1.1", 80))
+        ipaddr_check = s.getsockname()[0]
         s.close()
         print(ipaddr_check)
         mark_test = 1
     except:
         if mark_test == 1:
             mark_test = 0
-            move.destroy()      # motor stop.
-            scGear.moveInit()   # servo  back initial position.
+            move.destroy()  # motor stop.
+            scGear.moveInit()  # servo  back initial position.
 
-        ap_threading=threading.Thread(target=ap_thread)   #Define a thread for data receiving
-        ap_threading.setDaemon(True)                          #'True' means it is a front thread,it would close when the mainloop() closes
-        ap_threading.start()                                  #Thread starts
+        ap_threading = threading.Thread(
+            target=ap_thread
+        )  # Define a thread for data receiving
+        ap_threading.setDaemon(
+            True
+        )  #'True' means it is a front thread,it would close when the mainloop() closes
+        ap_threading.start()  # Thread starts
         if ws2812_mark:
-            ws2812.setColor(35,255,35)
-
-
-
+            ws2812.setColor(35, 255, 35)
 
 
 def recv_msg(tcpCliSock):
@@ -314,12 +313,7 @@ def recv_msg(tcpCliSock):
     move.setup()
 
     while True:
-        response = {
-            'status' : 'ok',
-            'title' : '',
-            'data' : None
-        }
-
+        response = {"status": "ok", "title": "", "data": None}
 
         data = tcpCliSock.recv(BUFSIZ).decode()
         print(data)
@@ -327,8 +321,7 @@ def recv_msg(tcpCliSock):
         if not data:
             continue
 
-
-        if isinstance(data,str):
+        if isinstance(data, str):
             robotCtrl(data)
 
             switchCtrl(data)
@@ -337,74 +330,81 @@ def recv_msg(tcpCliSock):
 
             configPWM(data)
 
-            if 'get_info' == data:
-                response['title'] = 'get_info'
-                response['data'] = [info.get_cpu_tempfunc(), info.get_cpu_use(), info.get_ram_info()]
-            if 'wsB' in data:
+            if "get_info" == data:
+                response["title"] = "get_info"
+                response["data"] = [
+                    info.get_cpu_tempfunc(),
+                    info.get_cpu_use(),
+                    info.get_ram_info(),
+                ]
+            if "wsB" in data:
                 try:
-                    set_B=data.split()
+                    set_B = data.split()
                     speed_set = int(set_B[1])
                 except:
                     pass
-            elif 'CVFL' == data:
+            elif "CVFL" == data:
                 FPV.FindLineMode = 1
-                tcpCliSock.send(b'CVFL_on')
+                tcpCliSock.send(b"CVFL_on")
 
-
-            elif 'CVFLColorSet' in data:
+            elif "CVFLColorSet" in data:
                 color = int(data.split()[1])
                 FPV.lineColorSet = color
 
-            elif 'CVFLL1' in data:
+            elif "CVFLL1" in data:
                 try:
-                    set_lip1=data.split()
+                    set_lip1 = data.split()
                     lip1_set = int(set_lip1[1])
                     FPV.linePos_1 = lip1_set
                 except:
                     pass
 
-            elif 'CVFLL2' in data:
+            elif "CVFLL2" in data:
                 try:
-                    set_lip2=data.split()
+                    set_lip2 = data.split()
                     lip2_set = int(set_lip2[1])
                     FPV.linePos_2 = lip2_set
                 except:
                     pass
 
-            elif 'CVFLSP' in data:
+            elif "CVFLSP" in data:
                 try:
-                    set_err=data.split()
+                    set_err = data.split()
                     err_set = int(set_lip1[1])
                     FPV.findLineError = err_set
                 except:
                     pass
 
-            elif 'findColorSet' in data:
+            elif "findColorSet" in data:
                 try:
                     command_dict = ast.literal_eval(data)
-                    if 'data' in command_dict and len(command_dict['data']) == 3:
-                        r, g, b = command_dict['data']
+                    if "data" in command_dict and len(command_dict["data"]) == 3:
+                        r, g, b = command_dict["data"]
                         fpv.colorFindSet(b, g, r)
                         print(f"color: r={r}, g={g}, b={b}")
                 except (SyntaxError, ValueError):
-                    print("The received string format is incorrect and cannot be parsed.")
+                    print(
+                        "The received string format is incorrect and cannot be parsed."
+                    )
         else:
             pass
         response = json.dumps(response)
         tcpCliSock.sendall(response.encode())
 
+
 def test_Network_Connection():
     while True:
         try:
-            s =socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-            s.connect(("1.1.1.1",80))
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("1.1.1.1", 80))
             s.close()
         except:
             move.destroy()
 
         time.sleep(0.5)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     switch.switchSetup()
     switch.set_all_switch_off()
     ws2812_mark = None
@@ -413,19 +413,23 @@ if __name__ == '__main__':
         # global WS2812
         robotlight_check = robotLight.check_rpi_model()
         if robotlight_check == 5:
-            print("\033[1;33m WS2812 officially does not support Raspberry Pi 5 for the time being, and the WS2812 LED cannot be used on Raspberry Pi 5.\033[0m")
+            print(
+                "\033[1;33m WS2812 officially does not support Raspberry Pi 5 for the time being, and the WS2812 LED cannot be used on Raspberry Pi 5.\033[0m"
+            )
             ws2812_mark = 0  # WS2812 not compatible
         else:
             print("ws2812 success!")
             ws2812_mark = 1
             ws2812 = robotLight.RobotWS2812()
             ws2812.start()
-            ws2812.breath(70,70,255)
+            ws2812.breath(70, 70, 255)
     except:
-        print('Use "sudo pip3 install rpi_ws281x" to install WS_281x package\n using "sudo pip3 install rpi_ws281x" install rpi_ws281x')
+        print(
+            'Use "sudo pip3 install rpi_ws281x" to install WS_281x package\n using "sudo pip3 install rpi_ws281x" install rpi_ws281x'
+        )
         pass
 
-    HOST = ''
+    HOST = ""
     PORT = 10223
     BUFSIZ = 1024
     ADDR = (HOST, PORT)
@@ -446,4 +450,4 @@ if __name__ == '__main__':
     except Exception as e:
         print(e)
         if ws2812_mark:
-            ws2812.setColor(0,0,0)
+            ws2812.setColor(0, 0, 0)

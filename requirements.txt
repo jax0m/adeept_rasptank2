@@ -1,0 +1,23 @@
+psutil
+flask
+flask-cors
+gpiozero
+# busio
+# adafruit_motor
+adafruit_pca9685
+board
+# adafruit_ads7830
+opencv-python
+zmq
+thread
+numpy
+pyzmq
+greenlet
+websockets
+imutils
+# picamera2
+Voltage
+
+# requires " Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/" installed on Windows
+spidev
+rpi_ws281x

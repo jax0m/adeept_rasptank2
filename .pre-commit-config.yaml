@@ -12,26 +12,16 @@ repos:
     rev: v3.21.2
     hooks:
       - id: pyupgrade
-  - repo: local
-    hooks:
-      - id: check-pre-commit-rev-in-example
-        name: Check pre-commit rev in example
-        language: python
-        entry: python -m scripts.check_pre_commit_rev_in_example
-        files: '(CHANGES\.md|source_version_control\.md)$'
-        additional_dependencies:
-          &version_check_dependencies [
-            commonmark==0.9.1,
-            pyyaml==6.0.1,
-            beautifulsoup4==4.9.3,
-          ]
 
-      - id: check-version-in-the-basics-example
-        name: Check black version in the basics example
-        language: python
-        entry: python -m scripts.check_version_in_basics_example
-        files: '(CHANGES\.md|the_basics\.md)$'
-        additional_dependencies: *version_check_dependencies
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.14.8
+    hooks:
+      # Run the linter.
+      - id: ruff-check
+        args: [--fix]
+      # Run the formatter.
+      - id: ruff-format
 
   - repo: https://github.com/pycqa/isort
     rev: 6.1.0

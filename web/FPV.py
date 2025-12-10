@@ -53,13 +53,23 @@ colorLower = np.array([24, 100, 100])
 hflip = 0  # Video flip horizontally: 0 or 1
 vflip = 0  # Video vertical flip: 0/1
 
+
 def map(input, in_min, in_max, out_min, out_max):
     return (input - in_min) / (in_max - out_min) * (out_max - out_min) + out_min
 
 
 def findLineCtrl(posInput, setCenter):
-    global findLineMove, tracking_servo_status, FLCV_Status, tracking_servo_left, tracking_servo_left_mark, \
-        tracking_servo_right_mark, servo_left_stop, servo_right_stop,CVRun,turn_speed
+    global \
+        findLineMove, \
+        tracking_servo_status, \
+        FLCV_Status, \
+        tracking_servo_left, \
+        tracking_servo_left_mark, \
+        tracking_servo_right_mark, \
+        servo_left_stop, \
+        servo_right_stop, \
+        CVRun, \
+        turn_speed
     if FLCV_Status == 0:
         scGear.moveAngle(0, 0)
         scGear.moveAngle(1, 0)
@@ -73,20 +83,23 @@ def findLineCtrl(posInput, setCenter):
         if posInput > 480:
             tracking_servo_status = 1
             if CVRun:
-                move.video_Tracking_Move(turn_speed, 1,"right") # 'no'/'right':turn Right, turn_speed：left wheel speed, 0.2:turn_speed*0.2 = right wheel speed
+                move.video_Tracking_Move(
+                    turn_speed, 1, "right"
+                )  # 'no'/'right':turn Right, turn_speed：left wheel speed, 0.2:turn_speed*0.2 = right wheel speed
             else:
                 move.motorStop()
         elif posInput < 180:
             tracking_servo_status = -1
             if CVRun:
-                move.video_Tracking_Move(turn_speed, 1,"left") # 'no'/'right':turn Right, turn_speed：left wheel speed, 0.2:turn_speed*0.2 = right wheel speed
+                move.video_Tracking_Move(
+                    turn_speed, 1, "left"
+                )  # 'no'/'right':turn Right, turn_speed：left wheel speed, 0.2:turn_speed*0.2 = right wheel speed
             else:
                 move.motorStop()
         else:
             tracking_servo_status = 0
             if CVRun:
-                move.video_Tracking_Move(turn_speed, 1,"mid")
-
+                move.video_Tracking_Move(turn_speed, 1, "mid")
 
             else:
                 move.motorStop()
@@ -96,16 +109,18 @@ def findLineCtrl(posInput, setCenter):
         move.motorStop()
         FLCV_Status = -1
         if tracking_servo_status == -1:
-            move.video_Tracking_Move(turn_speed, 1,"right")
+            move.video_Tracking_Move(turn_speed, 1, "right")
         elif tracking_servo_status == 1:
-            move.video_Tracking_Move(turn_speed, 1,"left")
+            move.video_Tracking_Move(turn_speed, 1, "left")
         else:
             pass
 
 
 def cvFindLine(frame_image):
     frame_findline = cv2.cvtColor(frame_image, cv2.COLOR_BGR2GRAY)
-    retval, frame_findline = cv2.threshold(frame_findline, Threshold, 255, cv2.THRESH_BINARY)
+    retval, frame_findline = cv2.threshold(
+        frame_findline, Threshold, 255, cv2.THRESH_BINARY
+    )
     frame_findline = cv2.erode(frame_findline, None, iterations=2)
     frame_findline = cv2.dilate(frame_findline, None, iterations=2)
     colorPos_1 = frame_findline[linePos_1]
@@ -151,43 +166,148 @@ def cvFindLine(frame_image):
     findLineCtrl(center, 320)
     try:
         if lineColorSet == 255:
-            cv2.putText(frame_image, ('Following White Line'), (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 255, 128), 1,
-                        cv2.LINE_AA)
-            cv2.putText(frame_findline, ('Following White Line'), (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 255, 128), 1,
-                        cv2.LINE_AA)
+            cv2.putText(
+                frame_image,
+                ("Following White Line"),
+                (30, 50),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (128, 255, 128),
+                1,
+                cv2.LINE_AA,
+            )
+            cv2.putText(
+                frame_findline,
+                ("Following White Line"),
+                (30, 50),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (128, 255, 128),
+                1,
+                cv2.LINE_AA,
+            )
         else:
-            cv2.putText(frame_image, ('Following Black Line'), (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 255, 128), 1,
-                        cv2.LINE_AA)
-            cv2.putText(frame_findline, ('Following Black Line'), (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 255, 128), 1,
-                        cv2.LINE_AA)
-        frame_findline=cv2.merge((frame_findline.copy(),frame_findline.copy(),frame_findline.copy()))
+            cv2.putText(
+                frame_image,
+                ("Following Black Line"),
+                (30, 50),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (128, 255, 128),
+                1,
+                cv2.LINE_AA,
+            )
+            cv2.putText(
+                frame_findline,
+                ("Following Black Line"),
+                (30, 50),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (128, 255, 128),
+                1,
+                cv2.LINE_AA,
+            )
+        frame_findline = cv2.merge(
+            (frame_findline.copy(), frame_findline.copy(), frame_findline.copy())
+        )
 
         if frameRender:
-            cv2.line(frame_image, (left_Pos1, (linePos_1 + 30)), (left_Pos1, (linePos_1 - 30)), (255, 128, 64), 1)
-            cv2.line(frame_image, (right_Pos1, (linePos_1 + 30)), (right_Pos1, (linePos_1 - 30)), (64, 128, 255), )
+            cv2.line(
+                frame_image,
+                (left_Pos1, (linePos_1 + 30)),
+                (left_Pos1, (linePos_1 - 30)),
+                (255, 128, 64),
+                1,
+            )
+            cv2.line(
+                frame_image,
+                (right_Pos1, (linePos_1 + 30)),
+                (right_Pos1, (linePos_1 - 30)),
+                (64, 128, 255),
+            )
             cv2.line(frame_image, (0, linePos_1), (640, linePos_1), (255, 255, 64), 1)
 
-            cv2.line(frame_image, (left_Pos2, (linePos_2 + 30)), (left_Pos2, (linePos_2 - 30)), (255, 128, 64), 1)
-            cv2.line(frame_image, (right_Pos2, (linePos_2 + 30)), (right_Pos2, (linePos_2 - 30)), (64, 128, 255), 1)
+            cv2.line(
+                frame_image,
+                (left_Pos2, (linePos_2 + 30)),
+                (left_Pos2, (linePos_2 - 30)),
+                (255, 128, 64),
+                1,
+            )
+            cv2.line(
+                frame_image,
+                (right_Pos2, (linePos_2 + 30)),
+                (right_Pos2, (linePos_2 - 30)),
+                (64, 128, 255),
+                1,
+            )
             cv2.line(frame_image, (0, linePos_2), (640, linePos_2), (255, 255, 64), 1)
 
-            cv2.line(frame_image, ((center - 20), int((linePos_1 + linePos_2) / 2)),
-                     ((center + 20), int((linePos_1 + linePos_2) / 2)), (0, 0, 0), 1)
-            cv2.line(frame_image, ((center), int((linePos_1 + linePos_2) / 2 + 20)),
-                     ((center), int((linePos_1 + linePos_2) / 2 - 20)), (0, 0, 0), 1)
+            cv2.line(
+                frame_image,
+                ((center - 20), int((linePos_1 + linePos_2) / 2)),
+                ((center + 20), int((linePos_1 + linePos_2) / 2)),
+                (0, 0, 0),
+                1,
+            )
+            cv2.line(
+                frame_image,
+                ((center), int((linePos_1 + linePos_2) / 2 + 20)),
+                ((center), int((linePos_1 + linePos_2) / 2 - 20)),
+                (0, 0, 0),
+                1,
+            )
         else:
-            cv2.line(frame_findline, (left_Pos1, (linePos_1 + 30)), (left_Pos1, (linePos_1 - 30)), (255, 128, 64), 2)
-            cv2.line(frame_findline, (right_Pos1, (linePos_1 + 30)), (right_Pos1, (linePos_1 - 30)), (64, 128, 255), 2)
-            cv2.line(frame_findline, (0, linePos_1), (640, linePos_1), (255, 128, 64), 2)
+            cv2.line(
+                frame_findline,
+                (left_Pos1, (linePos_1 + 30)),
+                (left_Pos1, (linePos_1 - 30)),
+                (255, 128, 64),
+                2,
+            )
+            cv2.line(
+                frame_findline,
+                (right_Pos1, (linePos_1 + 30)),
+                (right_Pos1, (linePos_1 - 30)),
+                (64, 128, 255),
+                2,
+            )
+            cv2.line(
+                frame_findline, (0, linePos_1), (640, linePos_1), (255, 128, 64), 2
+            )
 
-            cv2.line(frame_findline, (left_Pos2, (linePos_2 + 30)), (left_Pos2, (linePos_2 - 30)), (64, 128, 255), 2)
-            cv2.line(frame_findline, (right_Pos2, (linePos_2 + 30)), (right_Pos2, (linePos_2 - 30)), (64, 128, 255), 2)
-            cv2.line(frame_findline, (0, linePos_2), (640, linePos_2), (64, 128, 255), 2)
+            cv2.line(
+                frame_findline,
+                (left_Pos2, (linePos_2 + 30)),
+                (left_Pos2, (linePos_2 - 30)),
+                (64, 128, 255),
+                2,
+            )
+            cv2.line(
+                frame_findline,
+                (right_Pos2, (linePos_2 + 30)),
+                (right_Pos2, (linePos_2 - 30)),
+                (64, 128, 255),
+                2,
+            )
+            cv2.line(
+                frame_findline, (0, linePos_2), (640, linePos_2), (64, 128, 255), 2
+            )
 
-            cv2.line(frame_findline, ((center - 20), int((linePos_1 + linePos_2) / 2)),
-                     ((center + 20), int((linePos_1 + linePos_2) / 2)), (0, 0, 0), 1)
-            cv2.line(frame_findline, ((center), int((linePos_1 + linePos_2) / 2 + 20)),
-                     ((center), int((linePos_1 + linePos_2) / 2 - 20)), (0, 0, 0), 1)
+            cv2.line(
+                frame_findline,
+                ((center - 20), int((linePos_1 + linePos_2) / 2)),
+                ((center + 20), int((linePos_1 + linePos_2) / 2)),
+                (0, 0, 0),
+                1,
+            )
+            cv2.line(
+                frame_findline,
+                ((center), int((linePos_1 + linePos_2) / 2 + 20)),
+                ((center), int((linePos_1 + linePos_2) / 2 - 20)),
+                (0, 0, 0),
+                1,
+            )
     except:
         pass
 
@@ -270,15 +390,17 @@ class FPV:
 
         colorUpper = np.array([HUE_1, SAT_1, VAL_1])
         colorLower = np.array([HUE_2, SAT_2, VAL_2])
-        print('HSV_1:%d %d %d' % (HUE_1, SAT_1, VAL_1))
-        print('HSV_2:%d %d %d' % (HUE_2, SAT_2, VAL_2))
+        print("HSV_1:%d %d %d" % (HUE_1, SAT_1, VAL_1))
+        print("HSV_2:%d %d %d" % (HUE_2, SAT_2, VAL_2))
         print(colorUpper)
         print(colorLower)
 
     def servoMove(ID, Dir, errorInput):
         if ID == 1:
             errorGenOut = FPV.kalman_filter_X.kalman(errorInput)
-            FPV.P_anglePos += 0.15 * (errorGenOut * Dir) * FPV.cameraDiagonalW / FPV.videoW
+            FPV.P_anglePos += (
+                0.15 * (errorGenOut * Dir) * FPV.cameraDiagonalW / FPV.videoW
+            )
             if abs(errorInput) > FPV.tor:
                 scGear.moveAngle(ID, FPV.P_anglePos)
                 FPV.X_lock = 0
@@ -286,7 +408,9 @@ class FPV:
                 FPV.X_lock = 1
         if ID == 4:
             errorGenOut = FPV.kalman_filter_Y.kalman(errorInput)
-            FPV.T_anglePos += 0.1 * (errorGenOut * Dir) * FPV.cameraDiagonalH / FPV.videoH
+            FPV.T_anglePos += (
+                0.1 * (errorGenOut * Dir) * FPV.cameraDiagonalH / FPV.videoH
+            )
             if abs(errorInput) > FPV.tor:
                 scGear.moveAngle(ID, FPV.T_anglePos)
                 FPV.Y_lock = 0
@@ -299,14 +423,13 @@ class FPV:
 
     def capture_thread(self, IPinver):
         ap = argparse.ArgumentParser()  # OpenCV initialization
-        ap.add_argument("-b", "--buffer", type=int, default=64,
-                        help="max buffer size")
+        ap.add_argument("-b", "--buffer", type=int, default=64, help="max buffer size")
         font = cv2.FONT_HERSHEY_SIMPLEX
 
         context = zmq.Context()
         footage_socket = context.socket(zmq.PAIR)
         print(IPinver)
-        footage_socket.connect('tcp://%s:5555' % IPinver)
+        footage_socket.connect("tcp://%s:5555" % IPinver)
 
         avg = None
         motionCounter = 0
@@ -314,17 +437,21 @@ class FPV:
 
         with Picamera2() as camera:
             if not camera.is_open:
-                raise RuntimeError('Could not start camera.')
+                raise RuntimeError("Could not start camera.")
             try:
                 camera.start()
                 stream = io.BytesIO()
             except Exception as e:
                 print(f"\033[38;5;1mError:\033[0m\n{e}")
-                print("\nPlease check whether the camera is connected well, and disable the \"legacy camera driver\" on raspi-config")
+                print(
+                    '\nPlease check whether the camera is connected well, and disable the "legacy camera driver" on raspi-config'
+                )
 
             while True:
                 preview_config = camera.preview_configuration
-                preview_config.format = 'RGB888'   # 'XRGB8888', 'XBGR8888', 'RGB888', 'BGR888', 'YUV420'
+                preview_config.format = (
+                    "RGB888"  # 'XRGB8888', 'XBGR8888', 'RGB888', 'BGR888', 'YUV420'
+                )
 
                 frame_image = camera.capture_array()
                 if frame_image is None:
@@ -333,9 +460,9 @@ class FPV:
 
                 if FindLineMode:
                     frame_findline = cvFindLine(frame_image)
-                    camera.exposure_mode = 'off'
+                    camera.exposure_mode = "off"
                 else:
-                    camera.exposure_mode = 'auto'
+                    camera.exposure_mode = "auto"
 
                 frame_image = cv2.cvtColor(frame_image, cv2.COLOR_RGB2BGR)
                 if FindColorMode:
@@ -343,11 +470,21 @@ class FPV:
                     mask = cv2.inRange(frame_image, colorLower, colorUpper)  # 1
                     mask = cv2.erode(mask, None, iterations=2)
                     mask = cv2.dilate(mask, None, iterations=2)
-                    cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
-                                            cv2.CHAIN_APPROX_SIMPLE)[-2]
+                    cnts = cv2.findContours(
+                        mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+                    )[-2]
                     center = None
                     if len(cnts) > 0:
-                        cv2.putText(frame_image, 'Target Detected', (40, 60), font, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+                        cv2.putText(
+                            frame_image,
+                            "Target Detected",
+                            (40, 60),
+                            font,
+                            0.5,
+                            (255, 255, 255),
+                            1,
+                            cv2.LINE_AA,
+                        )
 
                         c = max(cnts, key=cv2.contourArea)
                         ((x, y), radius) = cv2.minEnclosingCircle(c)
@@ -356,14 +493,28 @@ class FPV:
                         X = int(x)
                         Y = int(y)
                         if radius > 10:
-                            cv2.rectangle(frame_image, (int(x - radius), int(y + radius)), (int(x + radius), int(y - radius)),
-                                          (255, 255, 255), 1)
+                            cv2.rectangle(
+                                frame_image,
+                                (int(x - radius), int(y + radius)),
+                                (int(x + radius), int(y - radius)),
+                                (255, 255, 255),
+                                1,
+                            )
 
                         error_X = 320 - X
                         error_Y = 240 - Y
                         FPV.servoMove(FPV.T_servo, FPV.T_direction, -error_Y)
                     else:
-                        cv2.putText(frame_image, 'Target Detecting', (40, 60), font, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+                        cv2.putText(
+                            frame_image,
+                            "Target Detecting",
+                            (40, 60),
+                            font,
+                            0.5,
+                            (255, 255, 255),
+                            1,
+                            cv2.LINE_AA,
+                        )
                         move.motorStop()
 
                 if WatchDogMode:
@@ -377,25 +528,27 @@ class FPV:
 
                     cv2.accumulateWeighted(gray, avg, 0.5)
                     frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(avg))
-                    thresh = cv2.threshold(frameDelta, 5, 255,
-                                           cv2.THRESH_BINARY)[1]
+                    thresh = cv2.threshold(frameDelta, 5, 255, cv2.THRESH_BINARY)[1]
                     thresh = cv2.dilate(thresh, None, iterations=2)
-                    cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
-                                            cv2.CHAIN_APPROX_SIMPLE)
+                    cnts = cv2.findContours(
+                        thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+                    )
                     cnts = imutils.grab_contours(cnts)
                     for c in cnts:
                         if cv2.contourArea(c) < 5000:
                             continue
 
                         (x, y, w, h) = cv2.boundingRect(c)
-                        cv2.rectangle(frame_image, (x, y), (x + w, y + h), (128, 255, 0), 1)
+                        cv2.rectangle(
+                            frame_image, (x, y), (x + w, y + h), (128, 255, 0), 1
+                        )
                         motionCounter += 1
                         lastMovtionCaptured = timestamp
                 if FindLineMode and not frameRender:
-                    buffer = cv2.imencode('.jpg', frame_findline)[1].tobytes()
+                    buffer = cv2.imencode(".jpg", frame_findline)[1].tobytes()
                 else:
-                    if cv2.imencode('.jpg', frame_image)[0]:
-                        buffer = cv2.imencode('.jpg', frame_image)[1].tobytes()
+                    if cv2.imencode(".jpg", frame_image)[0]:
+                        buffer = cv2.imencode(".jpg", frame_image)[1].tobytes()
                 jpg_as_text = base64.b64encode(buffer)
                 footage_socket.send(jpg_as_text)
 
@@ -403,7 +556,7 @@ class FPV:
                 stream.truncate()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     scGear = RPIservo.ServoCtrl()
     scGear.moveInit()
     Tracking_sc = RPIservo.ServoCtrl()
@@ -412,4 +565,4 @@ if __name__ == '__main__':
     turn_speed = 35
     fpv = FPV()
     while 1:
-        fpv.capture_thread('192.168.3.199')
+        fpv.capture_thread("192.168.3.199")
