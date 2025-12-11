@@ -1,9 +1,11 @@
 psutil
+types-psutil
 flask
 flask-cors
 gpiozero
 # busio
-# adafruit_motor
+# adafruit_motor replaced with:
+adafruit-circuitpython-motor
 adafruit_pca9685
 board
 # adafruit_ads7830
@@ -15,7 +17,7 @@ pyzmq
 greenlet
 websockets
 imutils
-# picamera2
+picamera2
 Voltage
 
 # requires " Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/" installed on Windows

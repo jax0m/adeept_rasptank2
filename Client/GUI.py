@@ -6,6 +6,7 @@
 
 import json
 import math
+
 # from socket import *
 import socket
 import subprocess
@@ -86,7 +87,7 @@ def run_open():
 def getposHsv(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN:
         print("HSV is", HSVimg[y, x])
-        # findColorSet 172 21 69
+        # already commented out: # findColorSet 172 21 69
         tcpClicSock.send(
             (
                 "findColorSet %s %s %s"
@@ -116,7 +117,7 @@ def get_FPS():
 def advanced_OSD_add(draw_on, X, Y):  # 1
     error_X = X * 10
     error_Y = Y * 6 - 2
-    # if error_Y > 0:
+    # already commented out: # if error_Y > 0:
     X_s = int(200 + 120 - 120 * math.cos(math.radians(error_Y)))
     Y_s = int(240 + 120 * math.sin(math.radians(error_Y)) - error_X * 3)
 
@@ -195,7 +196,7 @@ def opencv_r():
     global frame_num, source, HSVimg
     while True:
         try:
-            frame = footage_socket.recv_string()
+            frame = socket.footage_socket.recv_string()
             img = base64.b64decode(frame)
             npimg = np.frombuffer(img, dtype=np.uint8)
             source = cv2.imdecode(npimg, 1)
@@ -213,7 +214,9 @@ def opencv_r():
             try:
                 cv2.putText(
                     source,
-                    ("CPU Temperature: %s" % CPU_TEP),
+                    (
+                        "CPU Temperature: %s" % socket.CPU_TEP_lab  # CPU_TEP
+                    ),
                     (370, 350),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.5,
@@ -223,7 +226,9 @@ def opencv_r():
                 )
                 cv2.putText(
                     source,
-                    ("CPU Usage: %s" % CPU_USE),
+                    (
+                        "CPU Usage: %s" % socket.CPU_USE_lab  # CPU_USE
+                    ),
                     (370, 380),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.5,
@@ -233,7 +238,9 @@ def opencv_r():
                 )
                 cv2.putText(
                     source,
-                    ("RAM Usage: %s" % RAM_USE),
+                    (
+                        "RAM Usage: %s" % socket.RAM_lab  # RAM_USE
+                    ),
                     (370, 410),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.5,
@@ -256,12 +263,12 @@ def opencv_r():
             except Exception:
                 pass
 
-            if advanced_OSD:  # 1
+            if advanced_OSD:  # already commented out: # 1
                 advanced_OSD_add(source, OSD_X, OSD_Y)
 
-            # cv2.putText(source,('%sm'%ultra_data),(210,290), cv2.FONT_HERSHEY_SIMPLEX, 0.5,(255,255,255),1,cv2.LINE_AA)
-            cv2.imshow("Stream", source)
-            cv2.setMouseCallback("Stream", getposBgr)
+            # already commented out: # cv2.putText(source,('%sm'%ultra_data),(210,290), cv2.FONT_HERSHEY_SIMPLEX, 0.5,(255,255,255),1,cv2.LINE_AA)
+            # cv2.imshow("Stream", source) # unused
+            # cv2.setMouseCallback("Stream", getposBgr) # unused
 
             HSVimg = cv2.cvtColor(source, cv2.COLOR_BGR2Lab)
             cv2.imshow("StreamHSV", HSVimg)
@@ -276,7 +283,7 @@ def opencv_r():
 
 
 fps_threading = thread.Thread(target=get_FPS)  # Define a thread for FPV and OpenCV
-fps_threading.setDaemon(
+fps_threading.daemon(
     True
 )  #'True' means it is a front thread,it would close when the mainloop() closes
 fps_threading.start()  # Thread starts
@@ -342,6 +349,10 @@ def connection_thread():
             Switch_1 = 0
             Btn_Switch_1.config(bg=color_btn)
 
+        elif "trackLine" in car_info:
+            function_stu = 1
+            Btn_function_1.config(bg="#4CAF50")
+
         elif "findColor" in car_info:
             function_stu = 1
             Btn_function_2.config(bg="#4CAF50")
@@ -358,9 +369,6 @@ def connection_thread():
             function_stu = 1
             Btn_function_5.config(bg="#4CAF50")
 
-        elif "trackLine" in car_info:
-            function_stu = 1
-            Btn_function_6.config(bg="#4CAF50")
         elif "Speech" in car_info:
             function_stu = 1
             Btn_function_6.config(bg="#4CAF50")
@@ -372,6 +380,7 @@ def connection_thread():
             Btn_function_3.config(bg=color_btn)
             Btn_function_4.config(bg=color_btn)
             Btn_function_5.config(bg=color_btn)
+            Btn_function_6.config(bg=color_btn)
 
         elif "CVFL_on" in car_info:
             function_stu = 1
@@ -418,7 +427,7 @@ def socket_connect():  # Call this function to connect with the server
     )  # Set connection value for socket
 
     for i in range(1, 6):  # Try 5 times if disconnected
-        # try:
+        # already commented out: # try:
         if ip_stu == 1:
             print("Connecting to server @ %s:%d..." % (SERVER_IP, SERVER_PORT))
             print("Connecting")
@@ -439,11 +448,11 @@ def socket_connect():  # Call this function to connect with the server
             connection_threading = thread.Thread(
                 target=connection_thread
             )  # Define a thread for FPV and OpenCV
-            connection_threading.setDaemon(True)
+            connection_threading.daemon(True)
             connection_threading.start()
 
             info_threading = thread.Thread(target=Info_receive)  # get CPU info
-            info_threading.setDaemon(True)
+            info_threading.daemon(True)
             info_threading.start()
 
             video_threading = thread.Thread(
@@ -470,7 +479,7 @@ def socket_connect():  # Call this function to connect with the server
 def connect(event):  # Call this function to connect with the server
     if ip_stu == 1:
         sc = thread.Thread(target=socket_connect)  # Define a thread for connection
-        sc.setDaemon(
+        sc.daemon(
             True
         )  #'True' means it is a front thread,it would close when the mainloop() closes
         sc.start()  # Thread starts
@@ -550,22 +559,22 @@ def servo_buttons(x, y):
         tcpClicSock.send(b"GLstop")
         GA_stu = 0
 
-    def call_up(event):
-        global GA_stu
-        if GA_stu == 0:
-            tcpClicSock.send(b"up")
-            GA_stu = 1
+    # def call_up(event): ####### unused
+    #     global GA_stu
+    #     if GA_stu == 0:
+    #         tcpClicSock.send(b"up")
+    #         GA_stu = 1
 
-    def call_down(event):
-        global GA_stu
-        if GA_stu == 0:
-            tcpClicSock.send(b"down")
-            GA_stu = 1
+    # def call_down(event): ####### unused
+    #     global GA_stu
+    #     if GA_stu == 0:
+    #         tcpClicSock.send(b"down")
+    #         GA_stu = 1
 
-    def call_UDstop(event):
-        global GA_stu
-        tcpClicSock.send(b"UDstop")
-        GA_stu = 0
+    # def call_UDstop(event): ####### unused
+    #     global GA_stu
+    #     tcpClicSock.send(b"UDstop")
+    #     GA_stu = 0
 
     Btn_0 = tk.Button(
         root, width=8, text="A_Left", fg=color_text, bg=color_btn, relief="ridge"
@@ -1097,7 +1106,17 @@ def function_buttons(x, y):
         Btn_function_2, \
         Btn_function_3, \
         Btn_function_4, \
-        Btn_function_5
+        Btn_function_5, \
+        Btn_function_6
+
+    def call_function_1(event):
+        global function_stu
+        if function_stu == 0:
+            tcpClicSock.send(b"trackLine")
+            function_stu = 1
+        else:
+            tcpClicSock.send(b"trackLineOff")
+            function_stu = 0
 
     def call_function_2(event):
         global function_stu
@@ -1135,13 +1154,13 @@ def function_buttons(x, y):
             tcpClicSock.send(b"automaticOff")
             function_stu = 0
 
-    def call_function_1(event):
+    def call_function_6(event):
         global function_stu
         if function_stu == 0:
-            tcpClicSock.send(b"trackLine")
+            tcpClicSock.send(b"speech")
             function_stu = 1
         else:
-            tcpClicSock.send(b"trackLineOff")
+            tcpClicSock.send(b"speechOff")
             function_stu = 0
 
     Btn_function_1 = tk.Button(
@@ -1159,18 +1178,23 @@ def function_buttons(x, y):
     Btn_function_5 = tk.Button(
         root, width=8, text="Automatic", fg=color_text, bg=color_btn, relief="ridge"
     )
+    Btn_function_6 = tk.Button(
+        root, width=8, text="Speech", fg=color_text, bg=color_btn, relief="ridge"
+    )
 
     Btn_function_1.place(x=x, y=y)
     Btn_function_2.place(x=x + 70, y=y)
     Btn_function_3.place(x=x + 140, y=y)
     Btn_function_4.place(x=x + 210, y=y)
     Btn_function_5.place(x=x + 280, y=y)
+    Btn_function_6.place(x=x + 350, y=y)
 
     Btn_function_1.bind("<ButtonPress-1>", call_function_1)
     Btn_function_2.bind("<ButtonPress-1>", call_function_2)
     Btn_function_3.bind("<ButtonPress-1>", call_function_3)
     Btn_function_4.bind("<ButtonPress-1>", call_function_4)
     Btn_function_5.bind("<ButtonPress-1>", call_function_5)
+    Btn_function_6.bind("<ButtonPress-1>", call_function_6)
 
 
 def config_buttons(x, y):

@@ -49,7 +49,7 @@ def validate_config(file, expected_lines):
         with open(file) as f:
             content = f.read()
         return all(line in content for line in expected_lines)
-    except:
+    except Exception:
         return False
 
 

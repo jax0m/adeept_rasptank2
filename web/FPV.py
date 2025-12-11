@@ -7,7 +7,6 @@
 
 import argparse
 import base64
-import datetime
 import io
 
 import cv2
@@ -18,7 +17,9 @@ import numpy as np
 import PID
 import RPIservo
 import zmq
-from picamera2 import Picamera2
+
+# from picamera2 import Picamera2
+import picamera2
 
 pid = PID.PID()
 pid.SetKp(0.5)
@@ -135,15 +136,17 @@ def cvFindLine(frame_image):
         if lineIndex_Pos1 != []:
             if abs(lineIndex_Pos1[0][-1] - lineIndex_Pos1[0][0]) > 500:
                 print("Tracking color not found")
-                findLineMove = 0
+                # findLineMove = 0 # unused
             else:
-                findLineMove = 1
+                pass
+                # findLineMove = 1 # unused, replaced with pass
         elif lineIndex_Pos2 != []:
             if abs(lineIndex_Pos2[0][-1] - lineIndex_Pos2[0][0]) > 500:
                 print("Tracking color not found")
-                findLineMove = 0
+                # findLineMove = 0 # unused
             else:
-                findLineMove = 1
+                pass
+                # findLineMove = 1 # unused, replaced with pass
 
         if lineColorCount_Pos1 == 0:
             lineColorCount_Pos1 = 1
@@ -159,7 +162,7 @@ def cvFindLine(frame_image):
         center_Pos2 = int((left_Pos2 + right_Pos2) / 2)
 
         center = int((center_Pos1 + center_Pos2) / 2)
-    except:
+    except Exception:
         center = None
         pass
 
@@ -308,7 +311,7 @@ def cvFindLine(frame_image):
                 (0, 0, 0),
                 1,
             )
-    except:
+    except Exception:
         pass
 
     return frame_findline
@@ -336,6 +339,7 @@ class FPV:
         self.fps = 0
         self.colorUpper = (44, 255, 255)
         self.colorLower = (24, 100, 100)
+        self.camera = picamera2.Picamera2()
 
     def SetIP(self, invar):
         self.IP = invar
@@ -355,15 +359,19 @@ class FPV:
         UltraData = invar
 
     def setExpCom(self, invar):
-        if invar > 25:
-            invar = 25
-        elif invar < -25:
-            invar = -25
+        # Limit exposure value to range [-10, 10] as per libcamera controls
+        if invar > 10:
+            invar = 10
+        elif invar < -10:
+            invar = -10
         else:
-            camera.exposure_compensation = invar
+            # Set ExposureValue directly using picamera2 controls
+            # This adjusts exposure by log2 factors: EV = -10 → 1/1024x, EV = 10 → 1024x
+            self.camera.set_controls({"ExposureValue": invar})
 
     def defaultExpCom(self):
-        camera.exposure_compensation = 0
+        # Reset exposure compensation to default (0)
+        self.camera.set_controls({"ExposureValue": 0})
 
     def colorFindSet(self, invarH, invarS, invarV):
         global colorUpper, colorLower
@@ -433,13 +441,13 @@ class FPV:
 
         avg = None
         motionCounter = 0
-        lastMovtionCaptured = datetime.datetime.now()
+        # lastMovtionCaptured = datetime.datetime.now() # unused
 
-        with Picamera2() as camera:
-            if not camera.is_open:
+        with self.camera:
+            if not self.camera.is_open:
                 raise RuntimeError("Could not start camera.")
             try:
-                camera.start()
+                self.camera.start()
                 stream = io.BytesIO()
             except Exception as e:
                 print(f"\033[38;5;1mError:\033[0m\n{e}")
@@ -448,21 +456,21 @@ class FPV:
                 )
 
             while True:
-                preview_config = camera.preview_configuration
+                preview_config = self.camera.preview_configuration
                 preview_config.format = (
                     "RGB888"  # 'XRGB8888', 'XBGR8888', 'RGB888', 'BGR888', 'YUV420'
                 )
 
-                frame_image = camera.capture_array()
+                frame_image = self.camera.capture_array()
                 if frame_image is None:
                     continue
-                timestamp = datetime.datetime.now()
+                # timestamp = datetime.datetime.now() # unused
 
                 if FindLineMode:
                     frame_findline = cvFindLine(frame_image)
-                    camera.exposure_mode = "off"
+                    self.camera.set_controls({"ExposureTimeModeEnum": 0})
                 else:
-                    camera.exposure_mode = "auto"
+                    self.camera.exposure_mode = "auto"
 
                 frame_image = cv2.cvtColor(frame_image, cv2.COLOR_RGB2BGR)
                 if FindColorMode:
@@ -473,7 +481,7 @@ class FPV:
                     cnts = cv2.findContours(
                         mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
                     )[-2]
-                    center = None
+                    # center = None # unused
                     if len(cnts) > 0:
                         cv2.putText(
                             frame_image,
@@ -488,9 +496,9 @@ class FPV:
 
                         c = max(cnts, key=cv2.contourArea)
                         ((x, y), radius) = cv2.minEnclosingCircle(c)
-                        M = cv2.moments(c)
-                        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-                        X = int(x)
+                        # M = cv2.moments(c) # unused
+                        # center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"])) # unused
+                        # X = int(x) # unused
                         Y = int(y)
                         if radius > 10:
                             cv2.rectangle(
@@ -500,8 +508,7 @@ class FPV:
                                 (255, 255, 255),
                                 1,
                             )
-
-                        error_X = 320 - X
+                        # error_X = 320 - X # unused
                         error_Y = 240 - Y
                         FPV.servoMove(FPV.T_servo, FPV.T_direction, -error_Y)
                     else:
@@ -543,7 +550,7 @@ class FPV:
                             frame_image, (x, y), (x + w, y + h), (128, 255, 0), 1
                         )
                         motionCounter += 1
-                        lastMovtionCaptured = timestamp
+                        # lastMovtionCaptured = timestamp # unused
                 if FindLineMode and not frameRender:
                     buffer = cv2.imencode(".jpg", frame_findline)[1].tobytes()
                 else:

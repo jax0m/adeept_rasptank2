@@ -5,6 +5,7 @@
 # Author      : Adeept
 # Date        : 2019/08/28
 import psutil
+import os
 
 
 def get_cpu_tempfunc():

@@ -355,7 +355,7 @@ def wifi_check():
         ipaddr_check = s.getsockname()[0]
         s.close()
         print(ipaddr_check)
-    except:
+    except Exception:
         ap_threading = threading.Thread(
             target=ap_thread
         )  # Define a thread for data receiving
@@ -421,7 +421,7 @@ async def recv_msg(websocket):
                 try:
                     set_B = data.split()
                     speed_set = int(set_B[1])
-                except:
+                except Exception:
                     pass
 
             # CVFL
@@ -509,7 +509,7 @@ if __name__ == "__main__":
                 WS2812.show()
             else:
                 pass
-        except:
+        except Exception:
             pass
     try:
         asyncio.get_event_loop().run_forever()

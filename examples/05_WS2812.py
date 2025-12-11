@@ -1,7 +1,6 @@
 import argparse
 import time
-
-from rpi_ws281x import *
+import rpi_ws281x
 
 # LED strip configuration:
 LED_COUNT = 14  # Number of LED pixels.
@@ -20,10 +19,10 @@ def setup():
     parser.add_argument(
         "-c", "--clear", action="store_true", help="clear the display on exit"
     )
-    args = parser.parse_args()
+    # args = parser.parse_args() # unused
 
     # Create NeoPixel object with appropriate configuration.
-    strip = Adafruit_NeoPixel(
+    strip = rpi_ws281x.Adafruit_NeoPixel(
         LED_COUNT,
         LED_PIN,
         LED_FREQ_HZ,
@@ -40,7 +39,7 @@ def setup():
 # Define functions which animate LEDs in various ways.
 def colorWipe(R, G, B):
     """Wipe color across display a pixel at a time."""
-    color = Color(R, G, B)
+    color = rpi_ws281x.Color(R, G, B)
     for i in range(strip.numPixels()):
         strip.setPixelColor(i, color)
         strip.show()

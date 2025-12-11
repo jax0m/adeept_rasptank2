@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 import datetime
 import threading
-import time
 
 import cv2
 import imutils
 import Kalman_filter
-import libcamera
+
+# import libcamera
 import move
 import numpy as np
 import PID
 import RPIservo
 from base_camera import BaseCamera
-from picamera2 import Picamera2
+import picamera2
 
 pid = PID.PID()
 pid.SetKp(0.5)
@@ -250,7 +250,7 @@ class CVThread(threading.Thread):
                     1,
                 )
 
-            except:
+            except Exception:
                 pass
 
         elif self.CVMode == "watchDog":
@@ -321,7 +321,7 @@ class CVThread(threading.Thread):
             CVThread.scGear.moveAngle(3, 0)
 
             FLCV_Status = 1
-        if posInput != None and findLineMove == 1:
+        if posInput is not None and findLineMove == 1:
             if FLCV_Status == -1:
                 CVThread.Tracking_sc.stopWiggle()
                 self.tracking_servo_left_mark = 0
@@ -387,15 +387,17 @@ class CVThread(threading.Thread):
             if lineIndex_Pos1 != []:
                 if abs(lineIndex_Pos1[0][-1] - lineIndex_Pos1[0][0]) > 500:
                     print("Tracking color not found")
-                    findLineMove = 0  # No tracking color, stop moving
+                    # findLineMove = 0 # unused
                 else:
-                    findLineMove = 1
+                    pass
+                    # findLineMove = 1 # unused, replaced with pass instead
             elif lineIndex_Pos2 != []:
                 if abs(lineIndex_Pos2[0][-1] - lineIndex_Pos2[0][0]) > 500:
                     print("Tracking color not found")
-                    findLineMove = 0
+                    # findLineMove = 0 # unused
                 else:
-                    findLineMove = 1
+                    pass
+                    # findLineMove = 1 # unused, replaced with pass instead
 
             if lineColorCount_Pos1 == 0:
                 lineColorCount_Pos1 = 1
@@ -417,7 +419,7 @@ class CVThread(threading.Thread):
             # print("2L/C/R: %s/%s/%s" %(self.left_Pos2, self.center_Pos2, self.right_Pos2))
 
             self.center = int((self.center_Pos1 + self.center_Pos2) / 2)
-        except:
+        except Exception:
             self.center = None
             pass
 
@@ -458,17 +460,17 @@ class CVThread(threading.Thread):
         cnts = cv2.findContours(
             mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )[-2]
-        center = None
+        # center = None # unused
         if len(cnts) > 0:
             self.findColorDetection = 1
             c = max(cnts, key=cv2.contourArea)
             ((self.box_x, self.box_y), self.radius) = cv2.minEnclosingCircle(c)
-            M = cv2.moments(c)
-            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-            X = int(self.box_x)
+            # M = cv2.moments(c) # unused
+            # center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"])) # unused
+            # X = int(self.box_x) # unused
             Y = int(self.box_y)
             error_Y = 240 - Y
-            error_X = 320 - X
+            # error_X = 320 - X # unused
             # CVThread.servoMove(CVThread.P_servo, CVThread.P_direction, error_X)
             CVThread.servoMove(CVThread.T_servo, CVThread.T_direction, error_Y)
         else:
@@ -581,19 +583,20 @@ class Camera(BaseCamera):
     @staticmethod
     def frames():
         global ImgIsNone, hflip, vflip
-        picam2 = Picamera2()
+        picam2 = picamera2.Picamera2()
 
-        preview_config = picam2.preview_configuration
-        preview_config.size = (640, 480)
-        preview_config.format = (
-            "RGB888"  # 'XRGB8888', 'XBGR8888', 'RGB888', 'BGR888', 'YUV420'
-        )
-        # hflip = 0
-        # vflip = 0
-        preview_config.transform = libcamera.Transform(hflip=hflip, vflip=vflip)
-        preview_config.colour_space = libcamera.ColorSpace.Sycc()
-        preview_config.buffer_count = 4
-        preview_config.queue = True
+        ##### Left Commented out for the moment as it was unclear what the overall function was attmepting to do
+        # preview_config = picam2.preview_configuration
+        # preview_config.size = (640, 480)
+        # preview_config.format = (
+        #     "RGB888"  # 'XRGB8888', 'XBGR8888', 'RGB888', 'BGR888', 'YUV420'
+        # )
+        # # hflip = 0
+        # # vflip = 0
+        # preview_config.transform = picam2.set_controls({"hflip": hflip,"vflip":vflip}) # libcamera.Transform(hflip=hflip, vflip=vflip)
+        # preview_config.colour_space = libcamera.ColorSpace.Sycc()
+        # preview_config.buffer_count = 4
+        # preview_config.queue = True
 
         if not picam2.is_open:
             raise RuntimeError("Could not start camera.")
@@ -611,7 +614,7 @@ class Camera(BaseCamera):
         cvt.start()
 
         while True:
-            start_time = time.time()
+            # start_time = time.time() # unused
             # read current frame
             img = picam2.capture_array()
 
@@ -651,7 +654,7 @@ class Camera(BaseCamera):
                 try:
                     pass
                     img = cvt.elementDraw(img)
-                except:
+                except Exception:
                     pass
 
             if cv2.imencode(".jpg", img)[0]:

@@ -9,7 +9,9 @@ import time
 import numpy
 import spidev
 from gpiozero import PWMOutputDevice as PWM
-from rpi_ws281x import *
+
+# from rpi_ws281x import *
+import rpi_ws281x
 
 
 def check_rpi_model():
@@ -60,7 +62,7 @@ class RobotWS2812(threading.Thread):
         self.lightMode = "none"  #'none' 'police' 'breath'
 
         # Create NeoPixel object with appropriate configuration.
-        self.strip = Adafruit_NeoPixel(
+        self.strip = rpi_ws281x.Adafruit_NeoPixel(
             self.LED_COUNT,
             self.LED_PIN,
             self.LED_FREQ_HZ,
@@ -79,13 +81,13 @@ class RobotWS2812(threading.Thread):
     # Define functions which animate LEDs in various ways.
     def set_all_led_color_data(self, R, G, B):
         """Wipe color across display a pixel at a time."""
-        color = Color(int(R), int(G), int(B))
+        color = rpi_ws281x.Color(int(R), int(G), int(B))
         for i in range(self.strip.numPixels()):
             self.strip.setPixelColor(i, color)
             self.strip.show()
 
     def setSomeColor(self, R, G, B, ID):
-        color = Color(int(R), int(G), int(B))
+        color = rpi_ws281x.Color(int(R), int(G), int(B))
         # print(int(R),'  ',int(G),'  ',int(B))
         for i in ID:
             self.strip.setPixelColor(i, color)

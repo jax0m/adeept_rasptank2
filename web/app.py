@@ -2,9 +2,11 @@
 import os
 import threading
 
-from camera_opencv import Camera
+from cv2 import Camera
 from flask import Flask, Response, send_from_directory
-from flask_cors import *
+
+# from flask_cors import *
+import flask_cors
 
 # import camera driver
 
@@ -13,7 +15,7 @@ from flask_cors import *
 # from camera_pi import Camera
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+flask_cors.CORS(app, supports_credentials=True)
 camera = Camera()
 
 
@@ -94,5 +96,5 @@ if __name__ == "__main__":
     WEB = webapp()
     try:
         WEB.startthread()
-    except:
+    except Exception:
         print("exit")

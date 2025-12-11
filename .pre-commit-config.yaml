@@ -23,27 +23,12 @@ repos:
       # Run the formatter.
       - id: ruff-format
 
-  - repo: https://github.com/pycqa/isort
-    rev: 6.1.0
-    hooks:
-      - id: isort
-
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.3.0
-    hooks:
-      - id: flake8
-        additional_dependencies:
-          - flake8-bugbear==24.2.6
-          - flake8-comprehensions
-          - flake8-simplify
-        exclude: ^src/blib2to3/
-
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.19.0
     hooks:
       - id: mypy
         exclude: ^(docs/conf.py|scripts/generate_schema.py)$
-        args: []
+        args: ["--python-version=3.12"]
         additional_dependencies: &mypy_deps
           - types-PyYAML
           - types-atheris
@@ -64,7 +49,7 @@ repos:
       - id: mypy
         name: mypy (Python 3.10)
         files: scripts/generate_schema.py
-        args: ["--python-version=3.10"]
+        args: ["--python-version=3.12"]
         additional_dependencies: *mypy_deps
 
   - repo: https://github.com/rbubley/mirrors-prettier

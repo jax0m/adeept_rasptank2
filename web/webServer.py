@@ -357,7 +357,7 @@ def wifi_check():
         ipaddr_check = s.getsockname()[0]
         s.close()
         print(ipaddr_check)
-    except:
+    except Exception:
         ap_threading = threading.Thread(
             target=ap_thread
         )  # Define a thread for data receiving
@@ -422,7 +422,7 @@ async def recv_msg(websocket):
                 try:
                     set_B = data.split()
                     speed_set = int(set_B[1])
-                except:
+                except Exception:
                     pass
 
             # CVFL
@@ -490,7 +490,7 @@ if __name__ == "__main__":
             WS2812 = robotLight.RobotWS2812()
             WS2812.start()
             WS2812.breath(70, 70, 255)
-    except:
+    except Exception:
         print(
             'Use "sudo pip3 install rpi_ws281x" to install WS_281x package\n using "sudo pip3 install rpi_ws281x" install rpi_ws281x'
         )
@@ -516,7 +516,7 @@ if __name__ == "__main__":
                 WS2812.setColor(0, 80, 255)
             else:
                 pass
-        except:
+        except Exception:
             pass
     try:
         asyncio.get_event_loop().run_forever()

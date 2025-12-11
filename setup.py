@@ -163,7 +163,7 @@ try:
     replace_num(
         "/boot/config.txt", "#dtparam=i2c_arm=on", "dtparam=i2c_arm=on\nstart_x=1\n"
     )
-except:
+except Exception:
     print("Error updating boot config to enable i2c. Please try again.")
 
 
@@ -174,7 +174,7 @@ try:
         file_to_write.write(
             "#!/bin/sh\nsleep 5\nsudo python3 " + thisPath + "/web/webServer.py"
         )
-except:
+except Exception:
     pass
 
 os.system("sudo chmod 777 /" + user_home + "/startup.sh")
@@ -192,7 +192,7 @@ if not os.path.exists("/etc/rc.local"):
                 file_to_write.write(
                     "#!/bin/sh -e\n/" + user_home + "/startup.sh start\nexit 0"
                 )
-        except:
+        except Exception:
             print("Error: writing /etc/rc.local/ failed.")
     else:
         print(
@@ -204,7 +204,7 @@ else:  # there is /etc/rc.local
         print(
             "/etc/rc.local setup complete. After turning the Raspberry Pi on again, the Raspberry Pi will automatically run the program to set the servos port signal to turn the servos to the middle position, which is convenient for mechanical assembly."
         )
-    except:
+    except Exception:
         print("Error adding to /startup.sh")
 
 

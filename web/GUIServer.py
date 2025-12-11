@@ -291,7 +291,7 @@ def wifi_check():
         s.close()
         print(ipaddr_check)
         mark_test = 1
-    except:
+    except Exception:
         if mark_test == 1:
             mark_test = 0
             move.destroy()  # motor stop.
@@ -341,7 +341,7 @@ def recv_msg(tcpCliSock):
                 try:
                     set_B = data.split()
                     speed_set = int(set_B[1])
-                except:
+                except Exception:
                     pass
             elif "CVFL" == data:
                 FPV.FindLineMode = 1
@@ -356,7 +356,7 @@ def recv_msg(tcpCliSock):
                     set_lip1 = data.split()
                     lip1_set = int(set_lip1[1])
                     FPV.linePos_1 = lip1_set
-                except:
+                except Exception:
                     pass
 
             elif "CVFLL2" in data:
@@ -364,15 +364,15 @@ def recv_msg(tcpCliSock):
                     set_lip2 = data.split()
                     lip2_set = int(set_lip2[1])
                     FPV.linePos_2 = lip2_set
-                except:
+                except Exception:
                     pass
 
             elif "CVFLSP" in data:
                 try:
-                    set_err = data.split()
+                    # set_err = data.split() # unused
                     err_set = int(set_lip1[1])
                     FPV.findLineError = err_set
-                except:
+                except Exception:
                     pass
 
             elif "findColorSet" in data:
@@ -398,7 +398,7 @@ def test_Network_Connection():
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             s.connect(("1.1.1.1", 80))
             s.close()
-        except:
+        except Exception:
             move.destroy()
 
         time.sleep(0.5)
@@ -423,7 +423,7 @@ if __name__ == "__main__":
             ws2812 = robotLight.RobotWS2812()
             ws2812.start()
             ws2812.breath(70, 70, 255)
-    except:
+    except Exception:
         print(
             'Use "sudo pip3 install rpi_ws281x" to install WS_281x package\n using "sudo pip3 install rpi_ws281x" install rpi_ws281x'
         )
