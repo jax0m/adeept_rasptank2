@@ -7,19 +7,21 @@ gpiozero
 # adafruit_motor replaced with:
 adafruit-circuitpython-motor
 adafruit_pca9685
+adafruit-circuitpython-ads7830
 board
 # adafruit_ads7830
 opencv-python
+pybase64
 zmq
 thread
 numpy
 pyzmq
 greenlet
-websockets
+websockets # websockets==13.0
 imutils
 picamera2
 Voltage
-
+pre-commit
 # requires " Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/" installed on Windows
 spidev
 rpi_ws281x

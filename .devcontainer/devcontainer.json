@@ -1,6 +1,5 @@
 {
   "build": { "dockerfile": "Dockerfile" },
-
   "customizations": {
     "vscode": {
       "extensions": [
@@ -13,6 +12,6 @@
         "davidanson.vscode-markdownlint"
       ]
     }
-  }
-  //   "postCreateCommand": "apt update; apt upgrade -y; apt autoremove -y; apt install git -y"
+  },
+  "postCreateCommand": "sudo pip install -r requirements.txt"
 }

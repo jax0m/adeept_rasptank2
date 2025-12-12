@@ -1,5 +1,7 @@
 FROM ptrsr/pi-ci
-RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get clean -y
-RUN apt-get update && apt-get -y install apt-utils  && apt-get clean -y
-RUN apt-get update && apt-get -y install git python3 pip python-is-python3 libcap-dev && apt-get clean -y
+RUN apt update && apt -y install apt-utils  && apt clean -y
+
+RUN apt update && apt -y install git python3 pip python-is-python3 libcap-dev sudo && apt clean -y
+
+RUN apt update && apt upgrade -y && apt autoremove -y && apt clean -y
 # RUN pip install -U pip

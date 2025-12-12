@@ -124,14 +124,14 @@ def enable_i2c_and_start_x() -> bool:
 
 
 # Function to check the Raspberry Pi OS version from /etc/os-release
-def check_raspbain_version() -> int:
+def check_raspbain_version() -> float:
     try:
         with open("/etc/os-release") as f:
             for line in f:
                 if line.startswith("VERSION_ID="):
                     version = line.strip().split("=")[1]
                     version = version.strip('"')
-                    return int(version)
+                    return float(version)
     except Exception as e:
         print(f"Error reading /etc/os-release: {str(e)}")
         return 12  # Default to 12 if there's an error
@@ -148,8 +148,8 @@ def get_user_confirmation(message: str) -> bool:
 
 
 # Update the package list
-print("Updating apt-get package list(s)")
-os.system("sudo apt-get update")
+print("Updating apt package list(s)")
+os.system("sudo apt update")
 
 # Track installation results
 installation_results: Dict[str, Dict[str, List[Any]]] = {
@@ -160,18 +160,18 @@ installation_results: Dict[str, Dict[str, List[Any]]] = {
 
 # Main execution
 
-# List of commands to install required packages using apt-get
+# List of commands to install required packages using apt
 commands_apt: List[str] = [
-    "sudo apt-get install -y python3-gpiozero",
-    "sudo apt-get install -y python3-pigpio",
-    "sudo apt-get install -y python3-opencv",
-    "sudo apt-get install -y python3-pyqt5",
-    "sudo apt-get install -y python3-opengl",
-    "sudo apt-get install -y python3-picamera2",
-    "sudo apt-get install -y python3-picamera2 --no-install-recommends",
-    "sudo apt-get install -y python3-opencv",
-    "sudo apt-get install -y opencv-data",
-    "sudo apt-get install -y python3-pyaudio",
+    "sudo apt install python3-gpiozero -y",
+    "sudo apt install python3-pigpio -y",
+    "sudo apt install python3-opencv -y",
+    "sudo apt install python3-pyqt5 -y",
+    "sudo apt install python3-opengl -y",
+    "sudo apt install python3-picamera2 -y",
+    "sudo apt install python3-picamera2 --no-install-recommends -y",
+    "sudo apt install python3-opencv -y",
+    "sudo apt install opencv-data -y",
+    "sudo apt install python3-pyaudio -y",
 ]
 
 # List of commands to install required Python packages using pip3
@@ -192,19 +192,19 @@ commands_pip_1: List[str] = [
 ]
 
 commands_pip_2: List[str] = [
-    "sudo pip install --break-system-packages adafruit-circuitpython-motor",
-    "sudo pip install --break-system-packages adafruit-circuitpython-pca9685",
-    "sudo pip install --break-system-packages flask",
-    "sudo pip install --break-system-packages flask_cors",
-    "sudo pip install --break-system-packages numpy",
-    "sudo pip install --break-system-packages pyzmq",
-    "sudo pip install --break-system-packages imutils",
-    "sudo pip install --break-system-packages zmq",
-    "sudo pip install --break-system-packages pybase64",
-    "sudo pip install --break-system-packages psutil",
-    "sudo pip install --break-system-packages websockets==13.0",
-    "sudo pip install --break-system-packages rpi_ws281x",
-    "sudo pip install --break-system-packages adafruit-circuitpython-ads7830",
+    "sudo pip install adafruit-circuitpython-motor --break-system-packages",
+    "sudo pip install adafruit-circuitpython-pca9685 --break-system-packages",
+    "sudo pip install flask --break-system-packages",
+    "sudo pip install flask_cors --break-system-packages",
+    "sudo pip install numpy --break-system-packages",
+    "sudo pip install pyzmq --break-system-packages",
+    "sudo pip install imutils --break-system-packages",
+    "sudo pip install zmq --break-system-packages",
+    "sudo pip install pybase64 --break-system-packages",
+    "sudo pip install psutil --break-system-packages",
+    "sudo pip install websockets==13.0 --break-system-packages",
+    "sudo pip install rpi_ws281x --break-system-packages",
+    "sudo pip install adafruit-circuitpython-ads7830 --break-system-packages",
 ]
 
 # List of commands to install create_ap, a tool for creating Wi-Fi hotspots
@@ -212,7 +212,7 @@ commands_3: List[str] = [
     "cd ~",
     "sudo git clone https://github.com/oblique/create_ap",
     "cd create_ap && sudo make install",
-    "sudo apt-get install -y util-linux procps hostapd iproute2 iw haveged dnsmasq",
+    "sudo apt install -y util-linux procps hostapd iproute2 iw haveged dnsmasq",
 ]
 
 
@@ -246,7 +246,7 @@ def install_package(package: str, package_type: str, install_cmd: str) -> bool:
 print("\nInstalling APT packages:")
 for cmd in commands_apt:
     # Extract package name from command
-    package = cmd.split(" ")[2]  # The third element is the package name
+    package = cmd.split(" ")[3]  # The third element is the package name
     if "install" in cmd:
         install_package(package, "apt", cmd)
 
@@ -266,7 +266,7 @@ for cmd in pip_commands:
 # Install other packages
 print("\nInstalling other components:")
 for cmd in commands_3:
-    if "apt-get install" in cmd:
+    if "apt install" in cmd:
         # Extract packages from command
         packages = cmd.split(" ")[4:]
         for package in packages:
