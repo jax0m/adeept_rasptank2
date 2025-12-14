@@ -5,13 +5,8 @@
 # Author      : devin
 
 # websocket
-import asyncio
 import json
 import os
-import socket
-import threading
-import time
-
 import app
 import functions
 import info
@@ -19,7 +14,9 @@ import move
 import robotLight
 import RPIservo
 import switch
+import asyncio
 import websockets
+import time
 
 OLED_connection = 0
 
@@ -69,6 +66,27 @@ direction_command = "no"
 turn_command = "no"
 
 
+def setup_event_loop():
+    """Ensure asyncio event loop is properly initialized"""
+    try:
+        # Get the current event loop
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        # If no event loop exists, create a new one
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    except Exception as e:
+        # Handle any other exceptions that might occur
+        print(f"Exception during event loop setup: {str(e)}")
+        loop = None
+
+    return loop
+
+
+# Set up the event loop at startup
+event_loop = setup_event_loop()
+
+
 def servoPosInit():
     scGear.initConfig(0, init_pwm0, 1)
     P_sc.initConfig(1, init_pwm1, 1)
@@ -80,15 +98,32 @@ def servoPosInit():
 
 def replace_num(initial, new_num):  # Call this function to replace data in '.txt' file
     global r
-    newline = ""
-    str_num = str(new_num)
-    with open(thisPath + "/RPIservo.py") as f:
-        for line in f.readlines():
-            if line.find(initial) == 0:
-                line = initial + "%s" % (str_num + "\n")
-            newline += line
-    with open(thisPath + "/RPIservo.py", "w") as f:
-        f.writelines(newline)
+    # newline = ""
+    # str_num = str(new_num)
+    # with open(thisPath + "/RPIservo.py") as f:
+    #     for line in f.readlines():
+    #         if line.find(initial) == 0:
+    #             line = initial + "%s" % (str_num + "\n")
+    #         newline += line
+    # with open(thisPath + "/RPIservo.py", "w") as f:
+    #     f.writelines(newline)
+    new_num = str(new_num)
+    new_line = initial + new_num + "\n"
+    updated_lines = []
+    file_path = thisPath + "/RPIservo.py"
+
+    try:
+        with open(file_path) as f:
+            for line in f:
+                if line.startswith(initial):
+                    updated_lines.append(new_line)
+                else:
+                    updated_lines.append(line)
+
+        with open(file_path, "w") as f:
+            f.writelines(updated_lines)
+    except Exception as e:
+        print(f"Error updating {file_path}: {str(e)}")
 
 
 # def FPV_thread():
@@ -97,8 +132,8 @@ def replace_num(initial, new_num):  # Call this function to replace data in '.tx
 #     fpv.capture_thread(addr[0])
 
 
-def ap_thread():
-    os.system("sudo create_ap wlan0 eth0 Adeept_Robot 12345678")
+# def ap_thread():
+#     os.system("sudo create_ap wlan0 eth0 Adeept_Robot 12345678")
 
 
 def functionSelect(command_input, response):
@@ -179,6 +214,20 @@ def switchCtrl(command_input, response):
         switch.switch(3, 0)
 
 
+def home_command():
+    """Ensure all servos are properly initialized"""
+    try:
+        # Initialize all servos to their home positions
+        H1_sc.moveServoInit(0)
+        H2_sc.moveServoInit(1)
+        P_sc.moveServoInit(2)
+        G_sc.moveServoInit(3)
+        T_sc.moveServoInit(4)
+        print("Robot has returned to home position")
+    except Exception as e:
+        print(f"Error during home command: {str(e)}")
+
+
 def robotCtrl(command_input, response):
     global direction_command, turn_command
     if "forward" == command_input:
@@ -244,11 +293,12 @@ def robotCtrl(command_input, response):
         T_sc.stopWiggle()
 
     elif "home" == command_input:
-        H1_sc.moveServoInit(0)
-        H2_sc.moveServoInit(1)
-        P_sc.moveServoInit(2)
-        G_sc.moveServoInit(3)
-        T_sc.moveServoInit(4)
+        # H1_sc.moveServoInit(0)
+        # H2_sc.moveServoInit(1)
+        # P_sc.moveServoInit(2)
+        # G_sc.moveServoInit(3)
+        # T_sc.moveServoInit(4)
+        home_command()
         print("11")
 
 
@@ -329,44 +379,44 @@ def configPWM(command_input, response):
         replace_num("init_pwm2 = ", 90)
 
 
-def update_code():
-    # Update local to be consistent with remote
-    projectPath = thisPath[:-7]
-    with open(f"{projectPath}/config.json") as f1:
-        config = json.load(f1)
-        if not config["production"]:
-            print("Update code")
-            # Force overwriting local code
-            if (
-                os.system(
-                    f"cd {projectPath} && sudo git fetch --all && sudo git reset --hard origin/master && sudo git pull"
-                )
-                == 0
-            ):
-                print("Update successfully")
-                print("Restarting...")
-                os.system("sudo reboot")
+# def update_code():
+#     # Update local to be consistent with remote
+#     projectPath = thisPath[:-7]
+#     with open(f"{projectPath}/config.json") as f1:
+#         config = json.load(f1)
+#         if not config["production"]:
+#             print("Update code")
+#             # Force overwriting local code
+#             if (
+#                 os.system(
+#                     f"cd {projectPath} && sudo git fetch --all && sudo git reset --hard origin/master && sudo git pull"
+#                 )
+#                 == 0
+#             ):
+#                 print("Update successfully")
+#                 print("Restarting...")
+#                 os.system("sudo reboot")
 
 
-def wifi_check():
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("1.1.1.1", 80))
-        ipaddr_check = s.getsockname()[0]
-        s.close()
-        print(ipaddr_check)
-    except Exception:
-        ap_threading = threading.Thread(
-            target=ap_thread
-        )  # Define a thread for data receiving
-        ap_threading.setDaemon(
-            True
-        )  #'True' means it is a front thread,it would close when the mainloop() closes
-        ap_threading.start()  # Thread starts
-        if WS2812_mark:
-            WS2812.set_all_led_color_data(0, 16, 50)
-            WS2812.show()
-        time.sleep(1)
+# def wifi_check():
+#     try:
+#         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+#         s.connect(("1.1.1.1", 80))
+#         ipaddr_check = s.getsockname()[0]
+#         s.close()
+#         print(ipaddr_check)
+#     except Exception:
+#         ap_threading = threading.Thread(
+#             target=ap_thread
+#         )  # Define a thread for data receiving
+#         ap_threading.setDaemon(
+#             True
+#         )  #'True' means it is a front thread,it would close when the mainloop() closes
+#         ap_threading.start()  # Thread starts
+#         if WS2812_mark:
+#             WS2812.set_all_led_color_data(0, 16, 50)
+#             WS2812.show()
+#         time.sleep(1)
 
 
 async def check_permit(websocket):
@@ -475,49 +525,118 @@ if __name__ == "__main__":
     flask_app = app.webapp()
     flask_app.startthread()
 
+    global start_server
+
     try:
         WS2812_mark = 1
         WS2812 = robotLight.Adeept_SPI_LedPixel(16, 255)
         if WS2812.check_spi_state() != 0:
             WS2812.start()
-            WS2812.breath(70, 70, 255)
+            WS2812.breath(0, 255, 0)
         else:
             WS2812.led_close()
     except KeyboardInterrupt:
+        print("Keyboard interrupt called, shutting down LEDs")
+        WS2812.set_all_led_color_data(0, 0, 0)
+        WS2812.show()
         WS2812.led_close()
+        WS2812_mark = 0
         pass
+    except Exception:
+        print("LED unable to start")
+        WS2812_mark = 0
+        move.destroy()
 
-    while 1:
-        wifi_check()
-        try:  # Start server,waiting for client
-            start_server = websockets.serve(main_logic, "0.0.0.0", 8888)
-            asyncio.get_event_loop().run_until_complete(start_server)
-            print("waiting for connection...")
-            # print('...connected from :', addr)
-            break
-        except Exception as e:
-            print(e)
-            if WS2812_mark:
-                WS2812.set_all_led_color_data(0, 0, 0)
-                WS2812.show()
-            else:
-                pass
+    # while 1:
+    # wifi_check()
+    # try:  # Start server,waiting for client
+    #     print("Attempting websocket construction:")
+    #     try:
+    #         start_server = websockets.serve(main_logic, "0.0.0.0", 8888)
+    #         print("Attempting to set event loop to run until completed")
+    #         try:
+    #             asyncio.get_event_loop().run_until_complete(start_server)
+    #             print("Attemping to tell event loop to run forever")
+    #             try:
+    #                 asyncio.get_event_loop().run_forever()
+    #             except Exception as e:
+    #                 print("Exception caught while running async loop:")
+    #                 print(e)
+    #                 if WS2812_mark:
+    #                     WS2812.breath(255, 0, 0)
+    #                 else:
+    #                     pass
+    #                 move.destroy()
+    #         except Exception as e:
+    #             print("Could not inform event loop of start_server")
+    #             print(e)
+    #             if WS2812_mark:
+    #                 WS2812.breath(255, 0, 0)
+    #     except Exception as e:
+    #         print("Could not create start_server")
+    #         print(e)
+    #         if WS2812_mark:
+    #             WS2812.breath(255, 0, 0)
 
-        try:
-            if WS2812_mark == 1:
-                WS2812.set_all_led_color_data(0, 80, 255)
-                WS2812.show()
-            else:
-                pass
-        except Exception:
-            pass
+    #     print("waiting for connection...")
+    #     # asyncio.get_event_loop().run_forever()
+    #     #start_server = await serve(main_logic, "0.0.0.0", 8888)
+    #     #await start_server.serve_forever()
+    #     # print('...connected from :', addr)
+    #     # break
+    # except Exception as e:
+    #     print("Exception caught during construction of websocket:")
+    #     print(e)
+    #     if WS2812_mark:
+    #         WS2812.breath(255, 0, 0)
+    #         # WS2812.set_all_led_color_data(255, 0, 0)
+    #         WS2812.show()
+    #     # break
+
     try:
+        print("Try: Creating Event loop")
+        # Create a new event loop if one doesn't exist
+        event_loop = asyncio.get_event_loop()
+        print(" Completed: Created new loop")
+    except RuntimeError:
+        print(" Caught: Event loop runtime error caught, making new loop")
+        event_loop = asyncio.new_event_loop()
+        print("     Created new loop, setting new loop as current loop")
+        asyncio.set_event_loop(event_loop)
+        print("     Set new loop as loop, continuing")
+
+    # Start server
+    try:
+        print("Attempting websocket construction:")
+        start_server = websockets.serve(main_logic, "0.0.0.0", 8888)
+        print("Attempting to set event loop to run until completed")
+
+        # Run the server in the correct event loop
+        asyncio.get_event_loop().run_until_complete(start_server)
+        print("Attemping to tell event loop to run forever")
+
+        # Run the event loop forever
         asyncio.get_event_loop().run_forever()
+
     except Exception as e:
+        print("Could not create start_server")
         print(e)
         if WS2812_mark:
-            WS2812.set_all_led_color_data(0, 0, 0)
+            WS2812.breath(255, 0, 0)
+
+    try:
+        if WS2812_mark:
+            # WS2812.breath(0, 255, 0)
+            # WS2812.set_all_led_color_data(0, 80, 255)
             WS2812.show()
         else:
             pass
+    except Exception:
         move.destroy()
+        pass
+    except KeyboardInterrupt:
+        if WS2812_mark:
+            WS2812.set_all_led_color_data(0, 0, 0)
+            WS2812.show()
+            WS2812.led_close()
+        pass

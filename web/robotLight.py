@@ -5,7 +5,7 @@
 # Date		: 2025/02/23
 import threading
 import time
-
+import subprocess
 import numpy
 import spidev
 from gpiozero import PWMOutputDevice as PWM
@@ -28,8 +28,6 @@ def check_rpi_model():
 
 
 def run_command(cmd=""):
-    import subprocess
-
     p = subprocess.Popen(
         cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )
@@ -546,8 +544,6 @@ class RobotLight(threading.Thread):
 
 
 if __name__ == "__main__":
-    import time
-
     print("spidev version is ", spidev.__version__)
     print("spidev device as show:")
     #    os.system("ls /dev/spi*")

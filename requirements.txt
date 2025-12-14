@@ -2,11 +2,12 @@ psutil
 types-psutil
 flask
 flask-cors
+types-flask-cors
 gpiozero
 # busio
 # adafruit_motor replaced with:
 adafruit-circuitpython-motor
-adafruit_pca9685
+adafruit-circuitpython-pca9685
 adafruit-circuitpython-ads7830
 board
 # adafruit_ads7830
