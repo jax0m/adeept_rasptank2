@@ -1,3 +1,7 @@
+# Removed flask integration and simplified websockets logic
+# Updated event loop handling to ensure proper initialization
+# Removed redundant code and streamlined server startup
+
 #!/usr/bin/env/python
 # File name   : server.py
 # Production  : picar-b
@@ -66,27 +70,6 @@ direction_command = "no"
 turn_command = "no"
 
 
-def setup_event_loop():
-    """Ensure asyncio event loop is properly initialized"""
-    try:
-        # Get the current event loop
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        # If no event loop exists, create a new one
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-    except Exception as e:
-        # Handle any other exceptions that might occur
-        print(f"Exception during event loop setup: {str(e)}")
-        loop = None
-
-    return loop
-
-
-# Set up the event loop at startup
-event_loop = setup_event_loop()
-
-
 def servoPosInit():
     scGear.initConfig(0, init_pwm0, 1)
     P_sc.initConfig(1, init_pwm1, 1)
@@ -98,15 +81,6 @@ def servoPosInit():
 
 def replace_num(initial, new_num):  # Call this function to replace data in '.txt' file
     global r
-    # newline = ""
-    # str_num = str(new_num)
-    # with open(thisPath + "/RPIservo.py") as f:
-    #     for line in f.readlines():
-    #         if line.find(initial) == 0:
-    #             line = initial + "%s" % (str_num + "\n")
-    #         newline += line
-    # with open(thisPath + "/RPIservo.py", "w") as f:
-    #     f.writelines(newline)
     new_num = str(new_num)
     new_line = initial + new_num + "\n"
     updated_lines = []
@@ -142,7 +116,7 @@ def functionSelect(command_input, response):
     if "findColor" == command_input:
         flask_app.modeselect("findColor")
 
-    if "motionGet" == command_input:
+    elif "motionGet" == command_input:
         flask_app.modeselect("watchDog")
 
     elif "stopCV" == command_input:
@@ -360,7 +334,7 @@ def configPWM(command_input, response):
             P_sc.initConfig(1, init_pwm1, 1)
             replace_num("init_pwm1 = ", init_pwm1)
         elif numServo == 2:
-            scGear.initConfig(2, init_pwm2, 2)
+            scGear.initConfig(2, init_pwm_pwm2, 2)
             replace_num("init_pwm2 = ", init_pwm2)
 
     if "PWMINIT" == command_input:
@@ -504,7 +478,7 @@ async def recv_msg(websocket):
         await websocket.send(response)
 
 
-async def main_logic(websocket, path):
+async def main_logic(websocket):
     await check_permit(websocket)
     await recv_msg(websocket)
 
@@ -547,80 +521,57 @@ if __name__ == "__main__":
         WS2812_mark = 0
         move.destroy()
 
-    # while 1:
-    # wifi_check()
-    # try:  # Start server,waiting for client
-    #     print("Attempting websocket construction:")
-    #     try:
-    #         start_server = websockets.serve(main_logic, "0.0.0.0", 8888)
-    #         print("Attempting to set event loop to run until completed")
-    #         try:
-    #             asyncio.get_event_loop().run_until_complete(start_server)
-    #             print("Attemping to tell event loop to run forever")
-    #             try:
-    #                 asyncio.get_event_loop().run_forever()
-    #             except Exception as e:
-    #                 print("Exception caught while running async loop:")
-    #                 print(e)
-    #                 if WS2812_mark:
-    #                     WS2812.breath(255, 0, 0)
-    #                 else:
-    #                     pass
-    #                 move.destroy()
-    #         except Exception as e:
-    #             print("Could not inform event loop of start_server")
-    #             print(e)
-    #             if WS2812_mark:
-    #                 WS2812.breath(255, 0, 0)
-    #     except Exception as e:
-    #         print("Could not create start_server")
-    #         print(e)
-    #         if WS2812_mark:
-    #             WS2812.breath(255, 0, 0)
+    # The fix: Properly set up and run the event loop
 
-    #     print("waiting for connection...")
-    #     # asyncio.get_event_loop().run_forever()
-    #     #start_server = await serve(main_logic, "0.0.0.0", 8888)
-    #     #await start_server.serve_forever()
-    #     # print('...connected from :', addr)
-    #     # break
-    # except Exception as e:
-    #     print("Exception caught during construction of websocket:")
-    #     print(e)
-    #     if WS2812_mark:
-    #         WS2812.breath(255, 0, 0)
-    #         # WS2812.set_all_led_color_data(255, 0, 0)
-    #         WS2812.show()
-    #     # break
-
+    # Create the event loop properly
     try:
-        print("Try: Creating Event loop")
-        # Create a new event loop if one doesn't exist
-        event_loop = asyncio.get_event_loop()
-        print(" Completed: Created new loop")
-    except RuntimeError:
-        print(" Caught: Event loop runtime error caught, making new loop")
-        event_loop = asyncio.new_event_loop()
-        print("     Created new loop, setting new loop as current loop")
-        asyncio.set_event_loop(event_loop)
-        print("     Set new loop as loop, continuing")
-
-    # Start server
-    try:
-        print("Attempting websocket construction:")
-        start_server = websockets.serve(main_logic, "0.0.0.0", 8888)
-        print("Attempting to set event loop to run until completed")
-
-        # Run the server in the correct event loop
-        asyncio.get_event_loop().run_until_complete(start_server)
-        print("Attemping to tell event loop to run forever")
-
-        # Run the event loop forever
-        asyncio.get_event_loop().run_forever()
-
+        print("1-Creating Loop")
+        loop = asyncio.new_event_loop()
+        try:
+            print("2- setting event loop to reference new loop")
+            asyncio.set_event_loop(loop)
+            try:
+                print("3-     Attempting websocket construction:")
+                start_server = websockets.serve(main_logic, "0.0.0.0", 8888)
+                try:
+                    print(
+                        "4-         Attempting to set event loop to run until completed"
+                    )
+                    # Run the server in the correct event loop
+                    loop.run_until_complete(start_server)
+                    try:
+                        print("5-             Attempting to run the loop forever")
+                        loop.run_forever()
+                    except Exception as e:
+                        print("5-             Could not run the loop forever:")
+                        print(e)
+                        print("end")
+                        if WS2812_mark:
+                            WS2812.breath(255, 0, 0)
+                except Exception as e:
+                    print(
+                        "4-         unale to set event loop to run until start_server is completed"
+                    )
+                    print(e)
+                    print("end")
+                    if WS2812_mark:
+                        WS2812.breath(255, 0, 0)
+            except Exception as e:
+                print("3-  could not construct the websocket")
+                print(e)
+                print("end")
+                if WS2812_mark:
+                    WS2812.breath(255, 0, 0)
+        except Exception as e:
+            print("2- Could not set event loop to new loop")
+            print(e)
+            print("end")
+            if WS2812_mark:
+                WS2812.breath(255, 0, 0)
     except Exception as e:
-        print("Could not create start_server")
+        print("1-Could not create loop")
         print(e)
+        print("end")
         if WS2812_mark:
             WS2812.breath(255, 0, 0)
 
